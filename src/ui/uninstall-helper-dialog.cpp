@@ -13,7 +13,7 @@ UninstallHelperDialog::UninstallHelperDialog(QWidget *parent)
     : QDialog(parent)
 {
     setupUi(this);
-    setWindowIcon(QIcon(":/images/seafile.png"));
+    setWindowIcon(QIcon(":/images/zeron.png"));
     setWindowTitle(tr("Uninstall %1").arg(getBrand()));
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 

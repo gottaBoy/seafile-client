@@ -31,7 +31,7 @@ CreateRepoDialog::CreateRepoDialog(const Account& account,
     setupUi(this);
     setWindowTitle(tr("Create a library"));
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
-    setWindowIcon(QIcon(":/images/seafile.png"));
+    setWindowIcon(QIcon(":/images/zeron.png"));
 
 #if defined(Q_OS_MAC)
     layout()->setContentsMargins(6, 6, 6, 6);

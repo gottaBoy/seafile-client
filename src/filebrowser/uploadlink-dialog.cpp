@@ -8,7 +8,7 @@ UploadLinkDialog::UploadLinkDialog(const QString &text, QWidget *parent)
   : text_(text)
 {
     setWindowTitle(tr("Upload Link"));
-    setWindowIcon(QIcon(":/images/seafile.png"));
+    setWindowIcon(QIcon(":/images/zeron.png"));
     setWindowFlags((windowFlags() & ~Qt::WindowContextHelpButtonHint) |
                    Qt::WindowStaysOnTopHint);
     QVBoxLayout *layout = new QVBoxLayout;

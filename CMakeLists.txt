@@ -1,9 +1,10 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.9)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.26.0)
 
 PROJECT(seafile-client)
 SET(SEAFILE_CLIENT_VERSION_MAJOR 9)
 SET(SEAFILE_CLIENT_VERSION_MINOR 0)
 SET(SEAFILE_CLIENT_VERSION_PATCH 4)
+// SET(CMAKE_PREFIX_PATH "/opt/Qt/6.5.3/gcc_64")
 SET(PROJECT_VERSION "${SEAFILE_CLIENT_VERSION_MAJOR}.${SEAFILE_CLIENT_VERSION_MINOR}.${SEAFILE_CLIENT_VERSION_PATCH}")
 ADD_DEFINITIONS(-DSEAFILE_CLIENT_VERSION=${PROJECT_VERSION})
 ADD_DEFINITIONS(-DGLIB_VERSION_MIN_REQUIRED=GLIB_VERSION_2_26)
@@ -210,8 +211,10 @@ SET(moc_headers
   src/daemon-mgr.h
   src/auto-login-service.h
   src/repo-service.h
+#  src/catia-repo-service.h
   src/repo-service-helper.h
   src/events-service.h
+  src/catia-events-service.h
   src/avatar-service.h
   src/open-local-helper.h
   src/server-status-service.h
@@ -226,6 +229,8 @@ SET(moc_headers
   src/api/api-client.h
   src/api/api-request.h
   src/api/requests.h
+#  src/api/event.h
+#  src/api/catia-event.h
   src/rpc/rpc-client.h
   src/rpc/rpc-server.h
   src/ui/main-window.h
@@ -260,17 +265,21 @@ SET(moc_headers
   src/ui/loading-view.h
   src/ui/logout-view.h
   src/ui/repos-tab.h
+  src/ui/catia-repos-tab.h
+  src/ui/catia-tab.h
   src/ui/starred-files-tab.h
   src/ui/starred-files-list-view.h
   src/ui/starred-files-list-model.h
   src/ui/starred-file-item-delegate.h
   src/ui/activities-tab.h
   src/ui/events-list-view.h
+  src/ui/catia-events-list-view.h
   src/ui/event-details-dialog.h
   src/ui/event-details-tree.h
   src/ui/set-repo-password-dialog.h
   src/ui/sync-errors-dialog.h
   src/ui/search-bar.h
+  src/ui/catia-search-bar.h
   src/ui/two-factor-dialog.h
   src/filebrowser/file-browser-manager.h
   src/filebrowser/file-browser-dialog.h
@@ -411,6 +420,7 @@ SET(seafile_client_sources
   src/repo-service.cpp
   src/repo-service-helper.cpp
   src/events-service.cpp
+  src/catia-events-service.cpp
   src/server-status-service.cpp
   src/account-info-service.cpp
   src/customization-service.cpp
@@ -426,8 +436,10 @@ SET(seafile_client_sources
   src/api/api-error.cpp
   src/api/requests.cpp
   src/api/server-repo.cpp
+  src/api/catia-server-repo.cpp
   src/api/starred-file.cpp
   src/api/event.cpp
+  src/api/catia-event.cpp
   src/api/commit-details.cpp
   src/api/contact-share-info.cpp
   src/rpc/rpc-client.cpp
@@ -470,6 +482,8 @@ SET(seafile_client_sources
   src/ui/loading-view.cpp
   src/ui/logout-view.cpp
   src/ui/repos-tab.cpp
+  src/ui/catia-repos-tab.cpp
+  src/ui/catia-tab.cpp
   src/ui/starred-files-tab.cpp
   src/ui/starred-files-list-view.cpp
   src/ui/starred-files-list-model.cpp
@@ -477,11 +491,13 @@ SET(seafile_client_sources
   src/ui/starred-file-item-delegate.cpp
   src/ui/activities-tab.cpp
   src/ui/events-list-view.cpp
+  src/ui/catia-events-list-view.cpp
   src/ui/event-details-dialog.cpp
   src/ui/event-details-tree.cpp
   src/ui/set-repo-password-dialog.cpp
   src/ui/sync-errors-dialog.cpp
   src/ui/search-bar.cpp
+  src/ui/catia-search-bar.cpp
   src/ui/two-factor-dialog.cpp
   src/filebrowser/file-browser-manager.cpp
   src/filebrowser/file-browser-dialog.cpp

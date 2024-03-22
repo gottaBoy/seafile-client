@@ -30,7 +30,7 @@ CloneTasksDialog::CloneTasksDialog(QWidget *parent)
     setupUi(this);
 
     setWindowTitle(tr("Download tasks"));
-    setWindowIcon(QIcon(":/images/seafile.png"));
+    setWindowIcon(QIcon(":/images/zeron.png"));
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     setMinimumSize(QSize(600, 300));

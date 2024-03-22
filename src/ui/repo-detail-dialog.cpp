@@ -31,7 +31,7 @@ RepoDetailDialog::RepoDetailDialog(const ServerRepo &repo, QWidget *parent)
     setupUi(this);
     setWindowTitle(tr("Library \"%1\"").arg(repo.name));
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
-    setWindowIcon(QIcon(":/images/seafile.png"));
+    setWindowIcon(QIcon(":/images/zeron.png"));
 
     mTimeLabel->setText(translateCommitTime(repo.mtime));
     mOwnerLabel->setText(repo.owner);

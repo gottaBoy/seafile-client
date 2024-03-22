@@ -7,7 +7,7 @@ TwoFactorDialog::TwoFactorDialog(QWidget *parent) :
     setupUi(this);
     mText->setText(tr("Enter the two factor authentication token"));
     setWindowTitle(tr("Two Factor Authentication"));
-    setWindowIcon(QIcon(":/images/seafile.png"));
+    setWindowIcon(QIcon(":/images/zeron.png"));
 
     connect(mSubmit, SIGNAL(clicked()), this, SLOT(doSubmit()));
 }

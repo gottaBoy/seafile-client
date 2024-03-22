@@ -72,6 +72,8 @@ private slots:
     void onUpdate();
     void onCopy();
     void onMove();
+    void onPull();
+    void onPush();
 
     void onCancelDownload();
     void onSyncSubdirectory();
@@ -92,6 +94,7 @@ private:
     void contextMenuEvent(QContextMenuEvent *event);
     void resizeEvent(QResizeEvent *event);
     void onShareToUserOrGroup(bool to_group);
+    void onPullPush(bool is_push);
 
     Q_DISABLE_COPY(FileTableView)
 
@@ -112,6 +115,8 @@ private:
     QAction *share_to_group_action_;
     QAction *share_seafile_action_;
     QAction *update_action_;
+    QAction *push_action_;
+    QAction *pull_action_;
     QAction *copy_action_;
     QAction *move_action_;
     QAction *paste_action_;

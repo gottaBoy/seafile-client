@@ -75,18 +75,21 @@ void RepoTreeModel::initialize()
 {
     recent_updated_category_ = new RepoCategoryItem(CAT_INDEX_RECENT_UPDATED, tr("Recently Updated"));
     my_repos_category_ = new RepoCategoryItem(CAT_INDEX_MY_REPOS, tr("My Libraries"));
+    // TODO catia
     virtual_repos_category_ = new RepoCategoryItem(CAT_INDEX_VIRTUAL_REPOS, tr("Sub Libraries"));
     shared_repos_category_ = new RepoCategoryItem(CAT_INDEX_SHARED_REPOS, tr("Shared with me"));
     org_repos_category_ = new RepoCategoryItem(CAT_INDEX_SHARED_REPOS, tr("Shared with all"));
     groups_root_category_ = new RepoCategoryItem(CAT_INDEX_GROUP_REPOS, tr("Shared with groups"), 0);
     synced_repos_category_ = new RepoCategoryItem(CAT_INDEX_SYNCED_REPOS, tr("Synced Libraries"));
+//    pdm_repos_category_ = new RepoCategoryItem(CAT_INDEX_PDM_REPOS, tr("PDM"));
 
-    appendRow(recent_updated_category_);
+//    appendRow(recent_updated_category_);
     appendRow(my_repos_category_);
     // appendRow(virtual_repos_category_);
-    appendRow(shared_repos_category_);
-    appendRow(groups_root_category_);
-    appendRow(synced_repos_category_);
+//    appendRow(shared_repos_category_);
+//    appendRow(groups_root_category_);
+//    appendRow(synced_repos_category_);
+//    appendRow(pdm_repos_category_);
 
     if (tree_view_) {
         tree_view_->restoreExpandedCategries();
@@ -271,6 +274,9 @@ void RepoTreeModel::checkPersonalRepo(const ServerRepo& repo)
 
     // The repo is new
     RepoItem *item = new RepoItem(repo);
+    if (repo.biz == 1) {
+        item->setBiz(1);
+    }
     my_repos_category_->appendRow(item);
 }
 

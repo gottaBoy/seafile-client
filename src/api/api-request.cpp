@@ -7,12 +7,14 @@
 #include "api-error.h"
 
 #include "api-request.h"
+#include <iostream>
 
 SeafileApiRequest::SeafileApiRequest(const QUrl& url, Method method,
-                                     const QString& token)
+                                     const QString& token, const int biz)
     : url_(url),
       method_(method),
-      token_(token)
+      token_(token),
+      biz(biz)
 {
     api_client_ = new SeafileApiClient;
 }
@@ -73,7 +75,11 @@ void SeafileApiRequest::send()
         api_client_->get(url_);
         break;
     case METHOD_DELETE:
-        api_client_->deleteResource(url_);
+        if (!post_data_.isEmpty()) {
+            api_client_->deleteWithBody(url_, post_data_);
+        } else {
+            api_client_->deleteResource(url_);
+        }
         break;
     case METHOD_POST:
     case METHOD_PUT:
@@ -115,6 +121,7 @@ json_t* SeafileApiRequest::parseJSON(QNetworkReply &reply, json_error_t *error)
 {
     QByteArray raw = reply.readAll();
     //qWarning("\n%s\n", raw.data());
+    std::cout << raw.data() << std::endl;
     json_t *root = json_loads(raw.data(), 0, error);
     return root;
 }

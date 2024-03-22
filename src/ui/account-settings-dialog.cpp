@@ -16,7 +16,7 @@ AccountSettingsDialog::AccountSettingsDialog(const Account& account, QWidget *pa
 {
     setupUi(this);
     setWindowTitle(tr("Account Settings"));
-    setWindowIcon(QIcon(":/images/seafile.png"));
+    setWindowIcon(QIcon(":/images/zeron.png"));
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     mServerAddr->setText(account_.serverUrl.toString());

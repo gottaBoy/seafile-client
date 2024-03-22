@@ -1,13 +1,16 @@
+#include "api/requests.h"
+
 #include <jansson.h>
 
 #include <QScopedPointer>
 #include <QtNetwork>
 
+#include "account-mgr.h"
 #include "account.h"
-
 #include "api-error.h"
 #include "commit-details.h"
 #include "event.h"
+#include "filebrowser/seaf-dirent.h"
 #include "repo-service.h"
 #include "rpc/rpc-client.h"
 #include "seafile-applet.h"
@@ -16,9 +19,6 @@
 #include "utils/api-utils.h"
 #include "utils/json-utils.h"
 #include "utils/utils.h"
-#include "account-mgr.h"
-
-#include "api/requests.h"
 
 namespace
 {
@@ -54,6 +54,15 @@ const char* kClientSSOLinkUrl = "api2/client-sso-link/";
 const char* kClientSSOStatusUrl = "api2/client-sso-link/%1/";
 
 const char* kGetFileActivitiesUrl = "api/v2.1/activities/";
+
+// catia
+// const char* kGetCatiaFileUrl = "https://pdm.intra.zeron.ai/jeecgboot/ebom/list";
+const char* kGetCatiaFileUrl = "http://mock.apifox.com/m1/4073466-0-default/api/ebom/list";
+const char* kPdmFileSearchUrl = "http://mock.apifox.com/m1/4073466-0-default/api/pdm/list";
+//const char* kListPdmReposUrl = "http://mock.apifox.com/m1/4073466-0-default/api/pdm/repos/list";
+const char* kListPdmReposUrl = "http://10.10.2.63:8081/jeecgboot/pdmrepo/list/all";
+const char* kListEbomReposUrl = "http://10.10.2.63:8081/jeecgboot/ebom/ebom/purchaser";
+
 } // namespace
 
 
@@ -904,21 +913,26 @@ FileSearchRequest::FileSearchRequest(const Account& account,
                                      const QString& keyword,
                                      int page,
                                      int per_page,
-                                     const QString& repo_id)
-    : SeafileApiRequest(account.getAbsoluteUrl(kFileSearchUrl),
+                                     const QString& repo_id, const int biz)
+    : SeafileApiRequest(biz == 1 ? QString(kPdmFileSearchUrl) : account.getAbsoluteUrl(kFileSearchUrl),
                         SeafileApiRequest::METHOD_GET,
-                        account.token),
+                        account.token, biz),
       keyword_(keyword),
       page_(page)
 {
-    setUrlParam("q", keyword_);
-    if (page > 0) {
-        setUrlParam("page", QString::number(page));
-    }
-    // per_page = 2;
-    setUrlParam("per_page", QString::number(per_page));
-    if (!repo_id.isEmpty()) {
-        setUrlParam("search_repo", repo_id);
+    if (biz == 1) {
+        setUrlParam("page_num", QString::number(page));
+        setUrlParam("page_size", QString::number(per_page));
+    } else {
+        setUrlParam("q", keyword_);
+        if (page > 0) {
+            setUrlParam("page", QString::number(page));
+        }
+        // per_page = 2;
+        setUrlParam("per_page", QString::number(per_page));
+        if (!repo_id.isEmpty()) {
+            setUrlParam("search_repo", repo_id);
+        }
     }
 }
 
@@ -1497,4 +1511,114 @@ void ClientSSOStatusRequest::requestSuccess(QNetworkReply& reply)
     }
 
     emit success(status);
+}
+
+/**
+ * ListPdmReposRequest
+ */
+ListPdmReposRequest::ListPdmReposRequest(const Account& account, const int biz)
+    : SeafileApiRequest(QString(kListPdmReposUrl),
+                        SeafileApiRequest::METHOD_GET,
+                        QString(""), biz)
+{
+}
+
+void ListPdmReposRequest::requestSuccess(QNetworkReply& reply)
+{
+    json_error_t error;
+    json_t* root = parseJSON(reply, &error);
+    if (!root) {
+        qWarning("ListPdmReposRequest:failed to parse json:%s\n", error.text);
+        emit failed(ApiError::fromJsonError());
+        return;
+    }
+    QScopedPointer<json_t, JsonPointerCustomDeleter> json(root);
+    json_t* array = json_object_get(json.data(), "result");
+    std::vector<ServerRepo> repos = ServerRepo::listFromJSON(array, &error);
+    emit success(repos);
+}
+
+
+/**
+ * ListEbomReposRequest
+ */
+ListEbomReposRequest::ListEbomReposRequest(const Account& account, const int biz)
+    : SeafileApiRequest(QString(kListEbomReposUrl),
+                        SeafileApiRequest::METHOD_GET,
+                        QString(""), biz)
+{
+}
+
+void ListEbomReposRequest::requestSuccess(QNetworkReply& reply)
+{
+    json_error_t error;
+    json_t* root = parseJSON(reply, &error);
+    if (!root) {
+        qWarning("ListEbomReposRequest:failed to parse json:%s\n", error.text);
+        emit failed(ApiError::fromJsonError());
+        return;
+    }
+    QScopedPointer<json_t, JsonPointerCustomDeleter> json(root);
+
+    QList<SeafDirent> dirents;
+    json_t* array = json_object_get(json.data(), "result");
+    QList<SeafDirent> repos = SeafDirent::listFromJSON(array, &error);
+    emit success(repos);
+}
+
+GetCatiaEventsRequest::GetCatiaEventsRequest(const Account& account, int page, int perpage, int avatar_size)
+    : SeafileApiRequest(QUrl(kGetCatiaFileUrl),
+                        SeafileApiRequest::METHOD_GET,
+                        QString(""))
+{
+    setUrlParam("page_num", QString::number(page));
+    setUrlParam("page_size", QString::number(perpage));
+    setUrlParam("avatar_size", QString::number(avatar_size));
+}
+
+void GetCatiaEventsRequest::requestSuccess(QNetworkReply& reply)
+{
+    json_error_t error;
+    json_t* root = parseJSON(reply, &error);
+
+    if (!root) {
+        qWarning("GetCatiaEventsRequest: failed to parse json:%s\n", error.text);
+        emit failed(ApiError::fromJsonError());
+        return;
+    }
+
+    QScopedPointer<json_t, JsonPointerCustomDeleter> json(root);
+
+//    json_t* array = json_object_get(json.data(), "events");
+    json_t* array = json_object_get(json.data(), "data");
+    std::vector<CatiaEvent> events = CatiaEvent::listFromJSON(array, &error, true);
+
+    emit success(events);
+}
+
+/**
+ * ListCatiaReposRequest
+ */
+ListCatiaReposRequest::ListCatiaReposRequest(const Account& account, const int biz)
+    : SeafileApiRequest(account.getAbsoluteUrl(kListReposUrl),
+                        SeafileApiRequest::METHOD_GET,
+                        account.token, biz)
+{
+}
+
+void ListCatiaReposRequest::requestSuccess(QNetworkReply& reply)
+{
+    json_error_t error;
+    json_t* root = parseJSON(reply, &error);
+    if (!root) {
+        qWarning("ListCatiaReposRequest:failed to parse json:%s\n", error.text);
+        emit failed(ApiError::fromJsonError());
+        return;
+    }
+
+    QScopedPointer<json_t, JsonPointerCustomDeleter> json(root);
+
+    std::vector<ServerRepo> repos =
+        ServerRepo::listFromJSON(json.data(), &error);
+    emit success(repos);
 }

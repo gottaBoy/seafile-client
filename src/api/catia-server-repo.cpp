@@ -2,7 +2,7 @@
 #include <jansson.h>
 #include <QPixmap>
 
-#include "server-repo.h"
+#include "catia-server-repo.h"
 
 namespace {
 
@@ -14,12 +14,10 @@ QString getStringFromJson(const json_t *json, const char* key)
 } // namespace
 
 
-ServerRepo ServerRepo::fromJSON(const json_t *json, json_error_t */* error */)
+CatiaServerRepo CatiaServerRepo::fromJSON(const json_t *json, json_error_t */* error */)
 {
-    ServerRepo repo;
+    CatiaServerRepo repo;
     repo.id = getStringFromJson(json, "id");
-    repo.repo_id = getStringFromJson(json, "repoId");
-    repo.path = getStringFromJson(json, "path");
     repo.name = getStringFromJson(json, "name");
     repo.description = getStringFromJson(json, "desc");
 
@@ -49,18 +47,18 @@ ServerRepo ServerRepo::fromJSON(const json_t *json, json_error_t */* error */)
     return repo;
 }
 
-std::vector<ServerRepo> ServerRepo::listFromJSON(const json_t *json, json_error_t *error)
+std::vector<CatiaServerRepo> CatiaServerRepo::listFromJSON(const json_t *json, json_error_t *error)
 {
-    std::vector<ServerRepo> repos;
+    std::vector<CatiaServerRepo> repos;
     for (size_t i = 0; i < json_array_size(json); i++) {
-        ServerRepo repo = fromJSON(json_array_get(json, i), error);
+        CatiaServerRepo repo = fromJSON(json_array_get(json, i), error);
         repos.push_back(repo);
     }
 
     return repos;
 }
 
-QIcon ServerRepo::getIcon() const
+QIcon CatiaServerRepo::getIcon() const
 {
     if (this->isSubfolder()) {
         return QIcon(":/images/main-panel/folder.png");
@@ -73,7 +71,7 @@ QIcon ServerRepo::getIcon() const
     }
 }
 
-QPixmap ServerRepo::getPixmap(int size) const
+QPixmap CatiaServerRepo::getPixmap(int size) const
 {
     return getIcon().pixmap(size);
 }

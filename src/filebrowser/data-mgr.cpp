@@ -75,9 +75,9 @@ bool DataManager::getDirents(const QString& repo_id,
 }
 
 void DataManager::getDirentsFromServer(const QString& repo_id,
-                                       const QString& path)
+                                       const QString& path, const int biz)
 {
-    GetDirentsRequest *get_dirents_req = new GetDirentsRequest(account_, repo_id, path);
+    GetDirentsRequest *get_dirents_req = new GetDirentsRequest(account_, repo_id, path, biz);
     connect(get_dirents_req, SIGNAL(success(bool, const QList<SeafDirent>&, const QString&)),
             this, SLOT(onGetDirentsSuccess(bool, const QList<SeafDirent>&, const QString&)));
     connect(get_dirents_req, SIGNAL(failed(const ApiError&, const QString&)),
@@ -252,6 +252,90 @@ void DataManager::copyDirents(const QString &repo_id,
         req->send();
     }
 }
+
+void DataManager::deleteAndCopyFiles(const QString &repo_id,
+                              const QString &dir_path,
+                              const QMap<QString, int> &dict_file_names,
+                              const QString &dst_repo_id,
+                              const QString &dst_dir_path)
+{
+//    if(copy_move_in_progress_) {
+//        seafApplet->warningBox(tr("Another copy or move operation is in progress. Please wait until it finishes."));
+//        return;
+//    }
+//    copy_move_in_progress_ = true;
+    repo_id_ = repo_id;
+    dir_path_ = dir_path;
+    dst_repo_id_ = dst_repo_id;
+    dst_dir_path_ = dst_dir_path;
+    src_dirents_ = dict_file_names;
+
+    if (repo_id == dst_repo_id) {
+        copy_move_in_progress_ = false;
+        return;
+    }
+    GetRepoFilesRequest *req = new GetRepoFilesRequest(account_, dst_repo_id, dst_dir_path);
+    connect(req, SIGNAL(success(const QList<SeafDirent>&, const QString&)),
+            this, SLOT(onDeleteAndCopyFilesSuccess(const QList<SeafDirent>&, const QString&)));
+
+    connect(req, SIGNAL(failed(const ApiError&)),
+            this, SLOT(onDeleteAndCopyFilesFailed(const ApiError&)));
+    reqs_.push_back(req);
+    req->send();
+}
+
+void DataManager::onDeleteAndCopyFilesSuccess(const QList<SeafDirent> &dirents, const QString& repo_id)
+{
+//    copy_move_in_progress_ = true;
+    if (src_dirents_.empty()) {
+        copy_move_in_progress_ = false;
+        return;
+    }
+
+    QMap<QString, int> &dict_file_names = src_dirents_;
+    if (dirents.empty()) {
+        copy_move_in_progress_ = false;
+        copyDirents(repo_id_, dir_path_, dict_file_names, dst_repo_id_, dst_dir_path_);
+//        emit onDeleteAndCopyFilesSuccess(dst_repo_id_);
+        return;
+    }
+
+    QStringList names;
+    for (SeafDirent seaf :  dirents) {
+        if (dict_file_names.contains(seaf.name)) {
+            names.push_back(seaf.name);
+        }
+    }
+    copy_move_in_progress_ = false;
+    if (!names.empty()) {
+        BatchDeleteMultipleItemsRequest *req = new BatchDeleteMultipleItemsRequest(account_, dst_repo_id_, dst_dir_path_, names);
+        connect(req, SIGNAL(success(const bool&)), this,SLOT(onCopyFilesSuccess(const bool&)));
+        connect(req, SIGNAL(failed(const ApiError&)), this,SLOT(onDeleteAndCopyFilesFailed(const ApiError&)));
+        reqs_.push_back(req);
+        req->send();
+    } else {
+        copyDirents(repo_id_, dir_path_, dict_file_names, dst_repo_id_, dst_dir_path_);
+    }
+//    emit onDeleteAndCopyFilesSuccess(dst_repo_id);
+//    copy_move_in_progress_ = false;
+}
+
+void DataManager::onCopyFilesSuccess(bool success)
+{
+    copy_move_in_progress_ = false;
+    if (success) {
+        copyDirents(repo_id_, dir_path_, src_dirents_, dst_repo_id_, dst_dir_path_);
+    }
+}
+
+
+
+void DataManager::onDeleteAndCopyFilesFailed(const ApiError& error)
+{
+//    emit onDeleteAndCopyFilesFailed(error);
+    copy_move_in_progress_ = false;
+}
+
 
 void DataManager::slotAsyncCopyMutipleItemsSuccess(const QString& task_id)
 {
@@ -510,12 +594,46 @@ void DataManager::slotQueryAsyncMoveOperationProgressFailed(const ApiError& erro
 void DataManager::onGetDirentsSuccess(bool current_readonly, const QList<SeafDirent> &dirents, const QString& repo_id)
 {
     GetDirentsRequest *get_dirents_req =  qobject_cast<GetDirentsRequest *>(sender());
+    QList<SeafDirent> sdlist;
+    ServerRepo serverRepo = RepoService::instance()->getPdmRepo();
+    if (!serverRepo.repo_id.isEmpty() && serverRepo.repo_id == repo_id) {
+        sdlist = RepoService::instance()->getEbomRepos();
+        std::map<QString, SeafDirent> myMap;
+        for (SeafDirent item : dirents) {
+            myMap.insert(std::pair<QString, SeafDirent>(item.name, item));
+        }
+        for (QList<SeafDirent>::iterator it = sdlist.begin(); it != sdlist.end(); ++it) {
+            QString name = it->name + it->suffix;
+            std::map<QString, SeafDirent>::iterator mit = myMap.find(name);
+            if (mit != myMap.end()) {
+                it->name = mit->second.name;
+                it->type = mit->second.type;
+                it->readonly = mit->second.readonly;
+                it->id = mit->second.id;
+                it->size = mit->second.size;
+                it->mtime = mit->second.mtime;
+                it->is_locked = mit->second.is_locked;
+                it->locked_by_me = mit->second.locked_by_me;
+                it->lock_owner = mit->second.lock_owner;
+                it->lock_owner_name = mit->second.lock_owner_name;
+                it->lock_time = mit->second.lock_time;
+                it->modifier_name = mit->second.modifier_name;
+                it->is_push = true;
+            } else {
+                it->is_push = false;
+                it->name = name;
+            }
+            qDebug() << "name: "<< it->name << "zeron_code: " << it->zeron_code << "\n";
+        }
+    } else {
+        sdlist = dirents;
+    }
     dirents_cache_->saveCachedDirents(get_dirents_req->repoId(),
                                       get_dirents_req->path(),
                                       current_readonly,
-                                      dirents);
+                                          sdlist);
 
-    emit getDirentsSuccess(current_readonly, dirents, repo_id);
+    emit getDirentsSuccess(current_readonly, sdlist, repo_id);
 }
 
 void DataManager::onCreateDirectorySuccess(const QString& repo_id)

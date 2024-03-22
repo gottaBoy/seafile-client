@@ -253,89 +253,89 @@ void RepoTreeView::updateRepoActions()
     seafApplet->rpcClient()->getLocalRepo(item->repo().id, &r);
     item->setLocalRepo(r);
 
-    if (item->localRepo().isValid()) {
-        const LocalRepo& local_repo = item->localRepo();
-        download_action_->setEnabled(false);
-        download_toolbar_action_->setEnabled(false);
-
-        sync_now_action_->setEnabled(true);
-        sync_now_action_->setData(QVariant::fromValue(local_repo));
-
-        open_local_folder_action_->setData(QVariant::fromValue(local_repo));
-        open_local_folder_action_->setEnabled(true);
-        open_local_folder_toolbar_action_->setData(QVariant::fromValue(local_repo));
-        open_local_folder_toolbar_action_->setEnabled(true);
-
-        unsync_action_->setData(QVariant::fromValue(local_repo));
-        unsync_action_->setEnabled(true);
-
-        resync_action_->setData(QVariant::fromValue(local_repo));
-        resync_action_->setEnabled(true);
-
-        set_sync_interval_action_->setData(QVariant::fromValue(local_repo));
-        set_sync_interval_action_->setEnabled(true);
-
-        int err_id = LastSyncError::instance()->getRepoSyncError(local_repo.id);
-        if (local_repo.sync_state == LocalRepo::SYNC_STATE_DONE && err_id >= 0) {
-            view_repo_sync_errors_action_->setData(QVariant::fromValue(local_repo));
-            view_repo_sync_errors_action_->setVisible(true);
-
-            discard_repo_sync_errors_action_->setData(QVariant::fromValue(local_repo));
-            discard_repo_sync_errors_action_->setVisible(true);
-        } else {
-            view_repo_sync_errors_action_->setVisible(false);
-            discard_repo_sync_errors_action_->setVisible(false);
-        }
-
-        if (seafApplet->settingsManager()->autoSync()) {
-            toggle_auto_sync_action_->setData(QVariant::fromValue(local_repo));
-            toggle_auto_sync_action_->setEnabled(true);
-        } else {
-            toggle_auto_sync_action_->setEnabled(false);
-        }
-
-        if (local_repo.auto_sync) {
-            toggle_auto_sync_action_->setText(tr("Disable auto sync"));
-            toggle_auto_sync_action_->setToolTip(tr("Disable auto sync"));
-            toggle_auto_sync_action_->setIcon(QIcon(":/images/pause-gray.png"));
-        } else {
-            toggle_auto_sync_action_->setText(tr("Enable auto sync"));
-            toggle_auto_sync_action_->setToolTip(tr("Enable auto sync"));
-            toggle_auto_sync_action_->setIcon(QIcon(":/images/play-gray.png"));
-        }
-
-    } else {
-        if (item->repoDownloadable()) {
-            download_action_->setEnabled(true);
-            download_toolbar_action_->setEnabled(true);
-        } else {
-            download_action_->setEnabled(false);
-            download_toolbar_action_->setEnabled(false);
-        }
-
-        sync_now_action_->setEnabled(false);
-
-        open_local_folder_action_->setEnabled(false);
-        open_local_folder_toolbar_action_->setEnabled(false);
-        unsync_action_->setEnabled(false);
-        resync_action_->setEnabled(false);
-        set_sync_interval_action_->setEnabled(false);
-        toggle_auto_sync_action_->setEnabled(false);
-        view_repo_sync_errors_action_->setVisible(false);
-        discard_repo_sync_errors_action_->setVisible(false);
-    }
+//    if (item->localRepo().isValid()) {
+//        const LocalRepo& local_repo = item->localRepo();
+//        download_action_->setEnabled(false);
+//        download_toolbar_action_->setEnabled(false);
+//
+//        sync_now_action_->setEnabled(true);
+//        sync_now_action_->setData(QVariant::fromValue(local_repo));
+//
+//        open_local_folder_action_->setData(QVariant::fromValue(local_repo));
+//        open_local_folder_action_->setEnabled(true);
+//        open_local_folder_toolbar_action_->setData(QVariant::fromValue(local_repo));
+//        open_local_folder_toolbar_action_->setEnabled(true);
+//
+//        unsync_action_->setData(QVariant::fromValue(local_repo));
+//        unsync_action_->setEnabled(true);
+//
+//        resync_action_->setData(QVariant::fromValue(local_repo));
+//        resync_action_->setEnabled(true);
+//
+//        set_sync_interval_action_->setData(QVariant::fromValue(local_repo));
+//        set_sync_interval_action_->setEnabled(true);
+//
+//        int err_id = LastSyncError::instance()->getRepoSyncError(local_repo.id);
+//        if (local_repo.sync_state == LocalRepo::SYNC_STATE_DONE && err_id >= 0) {
+//            view_repo_sync_errors_action_->setData(QVariant::fromValue(local_repo));
+//            view_repo_sync_errors_action_->setVisible(true);
+//
+//            discard_repo_sync_errors_action_->setData(QVariant::fromValue(local_repo));
+//            discard_repo_sync_errors_action_->setVisible(true);
+//        } else {
+//            view_repo_sync_errors_action_->setVisible(false);
+//            discard_repo_sync_errors_action_->setVisible(false);
+//        }
+//
+//        if (seafApplet->settingsManager()->autoSync()) {
+//            toggle_auto_sync_action_->setData(QVariant::fromValue(local_repo));
+//            toggle_auto_sync_action_->setEnabled(true);
+//        } else {
+//            toggle_auto_sync_action_->setEnabled(false);
+//        }
+//
+//        if (local_repo.auto_sync) {
+//            toggle_auto_sync_action_->setText(tr("Disable auto sync"));
+//            toggle_auto_sync_action_->setToolTip(tr("Disable auto sync"));
+//            toggle_auto_sync_action_->setIcon(QIcon(":/images/pause-gray.png"));
+//        } else {
+//            toggle_auto_sync_action_->setText(tr("Enable auto sync"));
+//            toggle_auto_sync_action_->setToolTip(tr("Enable auto sync"));
+//            toggle_auto_sync_action_->setIcon(QIcon(":/images/play-gray.png"));
+//        }
+//
+//    } else {
+//        if (item->repoDownloadable()) {
+//            download_action_->setEnabled(true);
+//            download_toolbar_action_->setEnabled(true);
+//        } else {
+//            download_action_->setEnabled(false);
+//            download_toolbar_action_->setEnabled(false);
+//        }
+//
+//        sync_now_action_->setEnabled(false);
+//
+//        open_local_folder_action_->setEnabled(false);
+//        open_local_folder_toolbar_action_->setEnabled(false);
+//        unsync_action_->setEnabled(false);
+//        resync_action_->setEnabled(false);
+//        set_sync_interval_action_->setEnabled(false);
+//        toggle_auto_sync_action_->setEnabled(false);
+//        view_repo_sync_errors_action_->setVisible(false);
+//        discard_repo_sync_errors_action_->setVisible(false);
+//    }
 
     selected_repo_ = item->repo();
-    view_on_web_action_->setEnabled(true);
+//    view_on_web_action_->setEnabled(true);
     open_in_filebrowser_action_->setEnabled(true);
 
     show_detail_action_->setEnabled(true);
 
-    if (item->cloneTask().isCancelable()) {
-        cancel_download_action_->setEnabled(true);
-    } else {
-        cancel_download_action_->setEnabled(false);
-    }
+//    if (item->cloneTask().isCancelable()) {
+//        cancel_download_action_->setEnabled(true);
+//    } else {
+//        cancel_download_action_->setEnabled(false);
+//    }
     emit dataChanged(indexes.at(0), indexes.at(0));
 }
 
@@ -350,7 +350,8 @@ QStandardItem* RepoTreeView::getRepoItem(const QModelIndex &index) const
     QStandardItem *item = tree_model->itemFromIndex(mapped_index);
 
     if (item->type() != REPO_ITEM_TYPE &&
-        item->type() != REPO_CATEGORY_TYPE) {
+        item->type() != REPO_CATEGORY_TYPE &&
+        item->type() != PDM_REPO_ITEM_TYPE) {
         return NULL;
     }
     return item;
@@ -471,6 +472,26 @@ void RepoTreeView::createActions()
     discard_repo_sync_errors_action_->setIcon(QIcon(":/images/minus-gray.png"));
     discard_repo_sync_errors_action_->setStatusTip(tr("Ignore sync errors from this library"));
     connect(discard_repo_sync_errors_action_, SIGNAL(triggered()), this, SLOT(discardRepoSyncErrors()));
+
+    // TODO
+    show_detail_action_->setEnabled(false);
+    download_action_->setEnabled(false);
+    download_toolbar_action_->setEnabled(false);
+    sync_now_action_->setEnabled(false);
+    cancel_download_action_->setEnabled(false);
+    open_local_folder_action_->setEnabled(false);
+    open_local_folder_toolbar_action_->setEnabled(false);
+    unsync_action_->setEnabled(false);
+    toggle_auto_sync_action_->setEnabled(false);
+    view_on_web_action_->setEnabled(false);
+    share_repo_to_user_action_->setEnabled(false);
+    share_repo_to_group_action_->setEnabled(false);
+    // open_in_filebrowser_action_->setEnabled(false);
+    unshare_action_->setEnabled(false);
+    resync_action_->setEnabled(false);
+    set_sync_interval_action_->setEnabled(false);
+    view_repo_sync_errors_action_->setEnabled(false);
+    discard_repo_sync_errors_action_->setEnabled(false);
 }
 
 void RepoTreeView::downloadRepo()
@@ -554,6 +575,12 @@ void RepoTreeView::onItemDoubleClicked(const QModelIndex& index)
     }
     if (item->type() == REPO_ITEM_TYPE) {
         RepoItem *it = (RepoItem *)item;
+        if (it->biz() == 1) {
+            FileBrowserManager::getInstance()->openOrActivateDialog(
+                seafApplet->accountManager()->currentAccount(),
+                it->repo());
+            return;
+        }
         const LocalRepo& local_repo = it->localRepo();
         if (local_repo.isValid()) {
             // open local folder for downloaded repo
@@ -1114,7 +1141,7 @@ void RepoTreeView::setRepoSyncInterval()
     dialog.setLabelText(tr("Sync Interval (In seconds):"));
     dialog.setWindowTitle(
         tr("Set Sync Internval For Library \"%1\"").arg(local_repo.name));
-    dialog.setWindowIcon(QIcon(":/images/seafile.png"));
+    dialog.setWindowIcon(QIcon(":/images/zeron.png"));
     dialog.setWindowFlags(dialog.windowFlags() & ~Qt::WindowContextHelpButtonHint);
     dialog.resize(400, 100);
     if (dialog.exec() != QDialog::Accepted) {

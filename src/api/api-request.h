@@ -22,6 +22,7 @@ class SeafileApiRequest : public QObject {
     Q_OBJECT
 
 public:
+    int biz = 0;
     virtual ~SeafileApiRequest();
 
     const QUrl& url() const { return url_; }
@@ -63,7 +64,7 @@ protected:
 
     SeafileApiRequest(const QUrl& url,
                       const Method method,
-                      const QString& token = QString());
+                      const QString& token = QString(), const int biz = 0);
 
     json_t* parseJSON(QNetworkReply &reply, json_error_t *error);
 

@@ -59,7 +59,7 @@ SyncErrorsDialog::SyncErrorsDialog(QWidget *parent)
     // setupUi(this);
 
     setWindowTitle(tr("File Sync Errors"));
-    setWindowIcon(QIcon(":/images/seafile.png"));
+    setWindowIcon(QIcon(":/images/zeron.png"));
 
     Qt::WindowFlags flags =
         (windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::Dialog) |

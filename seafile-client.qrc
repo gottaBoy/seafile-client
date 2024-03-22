@@ -1,5 +1,6 @@
 <RCC>
 <qresource>
+    <file>images/zeron.png</file>
     <file>images/seafile.png</file>
     <file>images/seafile-24.png</file>
     <file>images/seafile-32.png</file>
@@ -104,6 +105,7 @@
     <file>images/sync/waiting.png</file>
     <file>images/sync/waiting@2x.png</file>
     <file>images/download-48.png</file>
+    <file>images/tabs/catia-normal.png</file>
     <file>images/tabs/star-normal.png</file>
     <file>images/tabs/star-normal@2x.png</file>
     <file>images/tabs/history-normal.png</file>

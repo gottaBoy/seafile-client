@@ -351,11 +351,13 @@ void FileTableView::setupContextMenu()
         lock_action_->setEnabled(false);
         lock_action_->setToolTip(tr("This feature is available in pro version only\n"));
     }
+    lock_action_->setEnabled(false);
 
     rename_action_ = new QAction(tr("&Rename"), this);
     connect(rename_action_, SIGNAL(triggered()),
             this, SLOT(onRename()));
     rename_action_->setShortcut(Qt::ALT + Qt::Key_R);
+    rename_action_->setEnabled(false);
 
     remove_action_ = new QAction(tr("&Delete"), this);
     connect(remove_action_, SIGNAL(triggered()),
@@ -366,26 +368,38 @@ void FileTableView::setupContextMenu()
     connect(share_action_, SIGNAL(triggered()),
             this, SLOT(onShare()));
     share_action_->setShortcut(Qt::ALT + Qt::Key_G);
+    share_action_->setEnabled(false);
 
     upload_link_action_ = new QAction(tr("&Generate %1 Upload Link").arg(getBrand()), this);
     connect(upload_link_action_, SIGNAL(triggered()),
             this, SLOT(onGenUploadLink()));
     upload_link_action_->setShortcut(Qt::ALT + Qt::Key_L);
+    upload_link_action_->setEnabled(false);
 
     share_to_user_action_ = new QAction(tr("Share to User"), this);
     connect(share_to_user_action_, SIGNAL(triggered()),
             this, SLOT(onShareToUser()));
+    share_to_user_action_->setEnabled(false);
 
     share_to_group_action_ = new QAction(tr("Share to Group"), this);
     connect(share_to_group_action_, SIGNAL(triggered()),
             this, SLOT(onShareToGroup()));
+    share_to_group_action_->setEnabled(false);
 
     share_seafile_action_ = new QAction(tr("G&enerate %1 Internal Link").arg(getBrand()), this);
     connect(share_seafile_action_, SIGNAL(triggered()),
             this, SLOT(onShareSeafile()));
     share_seafile_action_->setShortcut(Qt::ALT + Qt::Key_E);
+    share_seafile_action_->setEnabled(false);
 
     if (parent_->repo_.encrypted) {
+        share_action_->setEnabled(false);
+        upload_link_action_->setEnabled(false);
+        share_to_user_action_->setEnabled(false);
+        share_to_group_action_->setEnabled(false);
+    }
+
+    if (parent_->biz == 1) {
         share_action_->setEnabled(false);
         upload_link_action_->setEnabled(false);
         share_to_user_action_->setEnabled(false);
@@ -395,18 +409,37 @@ void FileTableView::setupContextMenu()
     update_action_ = new QAction(tr("&Update"), this);
     connect(update_action_, SIGNAL(triggered()), this, SLOT(onUpdate()));
     update_action_->setShortcut(Qt::ALT + Qt::Key_U);
+    update_action_->setEnabled(false);
+
+    pull_action_ = new QAction(tr("&Pull"), this);
+    connect(pull_action_, SIGNAL(triggered()), this, SLOT(onPull()));
+    // pull_action_->setShortcut(Qt::CTRL + Qt::Key_O);
+
+    push_action_ = new QAction(tr("&Push"), this);
+    connect(push_action_, SIGNAL(triggered()), this, SLOT(onPush()));
+    // push_action_->setShortcut(Qt::CTRL + Qt::Key_O);
+    if (parent_->isCatiaRepos()) {
+        saveas_action_->setEnabled(false);
+        push_action_->setEnabled(false);
+        remove_action_->setEnabled(false);
+    } else {
+        pull_action_->setEnabled(false);
+    }
 
     copy_action_ = new QAction(tr("&Copy"), this);
     connect(copy_action_, SIGNAL(triggered()), this, SLOT(onCopy()));
     copy_action_->setShortcut(QKeySequence::Copy);
+    copy_action_->setEnabled(false);
 
     move_action_ = new QAction(tr("Cu&t"), this);
     connect(move_action_, SIGNAL(triggered()), this, SLOT(onMove()));
     move_action_->setShortcut(QKeySequence::Cut);
+    move_action_->setEnabled(false);
 
     paste_action_ = new QAction(tr("&Paste"), this);
     connect(paste_action_, SIGNAL(triggered()), this, SIGNAL(direntPaste()));
     paste_action_->setShortcut(QKeySequence::Paste);
+    paste_action_->setEnabled(false);
 
     if (parent_->current_readonly_) {
         move_action_->setEnabled(false);
@@ -417,6 +450,7 @@ void FileTableView::setupContextMenu()
     connect(cancel_download_action_, SIGNAL(triggered()),
             this, SLOT(onCancelDownload()));
     cancel_download_action_->setShortcut(Qt::ALT + Qt::Key_C);
+    cancel_download_action_->setEnabled(false);
 
     sync_subdirectory_action_ = new QAction(tr("&Sync this folder"), this);
     connect(sync_subdirectory_action_, SIGNAL(triggered()),
@@ -426,6 +460,7 @@ void FileTableView::setupContextMenu()
         sync_subdirectory_action_->setEnabled(false);
         sync_subdirectory_action_->setToolTip(tr("This feature is available in pro version only\n"));
     }
+    sync_subdirectory_action_->setEnabled(false);
 
     open_local_cache_folder_action_ = new QAction(tr("Open Local Cache Folder"), this);
     connect(open_local_cache_folder_action_, SIGNAL(triggered()),
@@ -442,6 +477,8 @@ void FileTableView::setupContextMenu()
     context_menu_->addAction(share_to_user_action_);
     context_menu_->addAction(share_to_group_action_);
     context_menu_->addSeparator();
+    context_menu_->addAction(pull_action_);
+    context_menu_->addAction(push_action_);
     context_menu_->addAction(move_action_);
     context_menu_->addAction(copy_action_);
     context_menu_->addAction(paste_action_);
@@ -462,6 +499,8 @@ void FileTableView::setupContextMenu()
     this->addAction(saveas_action_);
     this->addAction(share_action_);
     this->addAction(share_seafile_action_);
+    this->addAction(pull_action_);
+    this->addAction(push_action_);
     this->addAction(move_action_);
     this->addAction(copy_action_);
     this->addAction(paste_action_);
@@ -577,88 +616,88 @@ void FileTableView::contextMenuEvent(QContextMenuEvent *event)
     //
 
     item_.reset(new SeafDirent(*dirent));
-
-    saveas_action_->setText(tr("&Save As..."));
-    saveas_action_->setVisible(true);
-    rename_action_->setVisible(true);
-    share_action_->setVisible(true);
-    share_seafile_action_->setVisible(true);
-    // update_action_->setVisible(true);
-    cancel_download_action_->setVisible(true);
-    cancel_download_action_->setVisible(false);
-    if (item_->readonly) {
-        move_action_->setEnabled(false);
-        rename_action_->setEnabled(false);
-        // update_action_->setEnabled(false);
-        remove_action_->setEnabled(false);
-    } else {
-        move_action_->setEnabled(true);
-        rename_action_->setEnabled(true);
-        // update_action_->setEnabled(true);
-        remove_action_->setEnabled(true);
-    }
-
-    if (item_->isDir()) {
-        lock_action_->setVisible(false);
-        // update_action_->setVisible(false);
-        saveas_action_->setEnabled(false);
-        sync_subdirectory_action_->setVisible(true);
-        share_to_user_action_->setVisible(true);
-        share_to_group_action_->setVisible(true);
-        upload_link_action_->setVisible(true);
-    } else {
-        if (item_->locked_by_me) {
-            lock_action_->setText(tr("Un&lock"));
-            lock_action_->setVisible(true);
-            move_action_->setEnabled(true);
-            remove_action_->setEnabled(true);
-            rename_action_->setEnabled(true);
-        } else if (item_->is_locked || item_->readonly) {
-            lock_action_->setVisible(false);
-            move_action_->setEnabled(false);
-            remove_action_->setEnabled(false);
-            rename_action_->setEnabled(false);
-        } else {
-            lock_action_->setText(tr("&Lock"));
-            lock_action_->setVisible(true);
-            move_action_->setEnabled(true);
-            remove_action_->setEnabled(true);
-            rename_action_->setEnabled(true);
-        }
-
-        // update_action_->setVisible(true);
-        saveas_action_->setEnabled(true);
-        sync_subdirectory_action_->setVisible(false);
-        share_to_user_action_->setVisible(false);
-        share_to_group_action_->setVisible(false);
-        upload_link_action_->setVisible(false);
-
-        if (TransferManager::instance()->getDownloadTask(parent_->repo_.id,
-            ::pathJoin(parent_->current_path_, dirent->name))) {
-            cancel_download_action_->setVisible(true);
-            saveas_action_->setVisible(false);
-        }
-    }
-
-    if (!parent_->account_.isPro() ||
-        parent_->repo_.owner != parent_->account_.username) {
-        share_to_user_action_->setVisible(false);
-        share_to_group_action_->setVisible(false);
-    }
-
-    QVariant file_status_v = source_model_->data(index, DirentCacheStatusRole);
-    AutoUpdateManager::FileStatus file_status = (AutoUpdateManager::FileStatus)file_status_v.toInt();
-    if (file_status == AutoUpdateManager::NOT_SYNCED) {
-        retry_upload_cached_file_action_->setVisible(true);
-        delete_local_version_action_->setVisible(true);
-        local_version_saveas_action_->setVisible(true);
-    }
-
-    QString localpath = DataManager::getLocalCacheFilePath(
-        parent_->repo_.id, ::pathJoin(parent_->current_path_, dirent->name));
-    if (QFileInfo(localpath).exists()) {
-        open_local_cache_folder_action_->setEnabled(true);
-    }
+// TODO
+//    saveas_action_->setText(tr("&Save As..."));
+//    saveas_action_->setVisible(true);
+//    rename_action_->setVisible(true);
+//    share_action_->setVisible(true);
+//    share_seafile_action_->setVisible(true);
+//    // update_action_->setVisible(true);
+//    cancel_download_action_->setVisible(true);
+//    cancel_download_action_->setVisible(false);
+//    if (item_->readonly) {
+//        move_action_->setEnabled(false);
+//        rename_action_->setEnabled(false);
+//        // update_action_->setEnabled(false);
+//        remove_action_->setEnabled(false);
+//    } else {
+//        move_action_->setEnabled(true);
+//        rename_action_->setEnabled(true);
+//        // update_action_->setEnabled(true);
+//        remove_action_->setEnabled(true);
+//    }
+//
+//    if (item_->isDir()) {
+//        lock_action_->setVisible(false);
+//        // update_action_->setVisible(false);
+//        saveas_action_->setEnabled(false);
+//        sync_subdirectory_action_->setVisible(true);
+//        share_to_user_action_->setVisible(true);
+//        share_to_group_action_->setVisible(true);
+//        upload_link_action_->setVisible(true);
+//    } else {
+//        if (item_->locked_by_me) {
+//            lock_action_->setText(tr("Un&lock"));
+//            lock_action_->setVisible(true);
+//            move_action_->setEnabled(true);
+//            remove_action_->setEnabled(true);
+//            rename_action_->setEnabled(true);
+//        } else if (item_->is_locked || item_->readonly) {
+//            lock_action_->setVisible(false);
+//            move_action_->setEnabled(false);
+//            remove_action_->setEnabled(false);
+//            rename_action_->setEnabled(false);
+//        } else {
+//            lock_action_->setText(tr("&Lock"));
+//            lock_action_->setVisible(true);
+//            move_action_->setEnabled(true);
+//            remove_action_->setEnabled(true);
+//            rename_action_->setEnabled(true);
+//        }
+//
+//        // update_action_->setVisible(true);
+//        saveas_action_->setEnabled(true);
+//        sync_subdirectory_action_->setVisible(false);
+//        share_to_user_action_->setVisible(false);
+//        share_to_group_action_->setVisible(false);
+//        upload_link_action_->setVisible(false);
+//
+//        if (TransferManager::instance()->getDownloadTask(parent_->repo_.id,
+//            ::pathJoin(parent_->current_path_, dirent->name))) {
+//            cancel_download_action_->setVisible(true);
+//            saveas_action_->setVisible(false);
+//        }
+//    }
+//
+//    if (!parent_->account_.isPro() ||
+//        parent_->repo_.owner != parent_->account_.username) {
+//        share_to_user_action_->setVisible(false);
+//        share_to_group_action_->setVisible(false);
+//    }
+//
+//    QVariant file_status_v = source_model_->data(index, DirentCacheStatusRole);
+//    AutoUpdateManager::FileStatus file_status = (AutoUpdateManager::FileStatus)file_status_v.toInt();
+//    if (file_status == AutoUpdateManager::NOT_SYNCED) {
+//        retry_upload_cached_file_action_->setVisible(true);
+//        delete_local_version_action_->setVisible(true);
+//        local_version_saveas_action_->setVisible(true);
+//    }
+//
+//    QString localpath = DataManager::getLocalCacheFilePath(
+//        parent_->repo_.id, ::pathJoin(parent_->current_path_, dirent->name));
+//    if (QFileInfo(localpath).exists()) {
+//        open_local_cache_folder_action_->setEnabled(true);
+//    }
 
     context_menu_->exec(position); // synchronously
 
@@ -856,6 +895,57 @@ void FileTableView::onCopy()
     }
 
     parent_->setFilesToBePasted(true, file_names);
+}
+
+void FileTableView::onPull() {
+    onPullPush(false);
+}
+
+void FileTableView::onPush() {
+    onPullPush(true);
+}
+
+void FileTableView::onPullPush(bool is_push)
+{
+    QMap<QString, int> file_names;
+    bool has_readonly = false;
+
+    int count = 0;
+    if (item_ == NULL) {
+        const QList<const SeafDirent*> dirents = getSelectedItemsFromSource();
+        for (int i = 0; i < dirents.size(); i++) {
+            // unable to move readonly files
+            if (dirents[i]->readonly) {
+                has_readonly = true;
+                break;
+            }
+            if (!is_push && !dirents[i]->is_push) {
+                count++;
+            }
+            file_names.insert(dirents[i]->name, dirents[i]->type == SeafDirent::DIR ? 1 : 0);
+        }
+    } else {
+        if (item_->readonly) {
+            has_readonly = true;
+        } else {
+            file_names.insert(item_->name, item_->type == SeafDirent::DIR ? 1 : 0);
+        }
+        if (!is_push && !item_->is_push) {
+            count++;
+        }
+    }
+
+    if (has_readonly) {
+        seafApplet->messageBox(tr("Unable to sync readonly files"), this);
+        return;
+    }
+
+    if (!is_push && count > 0) {
+        seafApplet->warningBox(tr("Unable to pull, file not found"), this);
+        return;
+    }
+
+    parent_->doPushDirent(is_push, file_names);
 }
 
 void FileTableView::onMove()

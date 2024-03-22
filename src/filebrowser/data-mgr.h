@@ -50,7 +50,7 @@ public:
                     bool *current_readonly);
 
     void getDirentsFromServer(const QString& repo_id,
-                              const QString& path);
+                              const QString& path, const int biz = 0);
 
     void createDirectory(const QString &repo_id,
                          const QString &path);
@@ -81,6 +81,12 @@ public:
                      const QMap<QString, int> &dict_file_names,
                      const QString &dst_repo_id,
                      const QString &dst_dir_path);
+
+    void deleteAndCopyFiles(const QString &repo_id,
+                      const QString &dir_path,
+                      const QMap<QString, int> &dict_file_names,
+                      const QString &dst_repo_id,
+                      const QString &dst_dir_path);
 
     void moveDirents(const QString &repo_id,
                      const QString &dir_path,
@@ -172,6 +178,9 @@ private slots:
     void onRenameDirentSuccess(const QString& repo_id);
     void onRemoveDirentSuccess(const QString& repo_id);
     void onRemoveDirentsSuccess(const QString& repo_id);
+    void onDeleteAndCopyFilesSuccess(const QList<SeafDirent> &dirents, const QString& dst_repo_id);
+    void onCopyFilesSuccess(bool success);
+    void onDeleteAndCopyFilesFailed(const ApiError& error);
     void onCopyDirentsSuccess(const QString& dst_repo_id);
     void onCopyDirentsFailed(const ApiError& error);
     void onMoveDirentsSuccess(const QString& dst_repo_id);

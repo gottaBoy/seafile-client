@@ -41,7 +41,7 @@ ShibLoginDialog::ShibLoginDialog(const QUrl& url,
       cookie_seen_(false)
 {
     setWindowTitle(tr("Login with Shibboleth"));
-    setWindowIcon(QIcon(":/images/seafile.png"));
+    setWindowIcon(QIcon(":/images/zeron.png"));
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     QVBoxLayout *vlayout = new QVBoxLayout();

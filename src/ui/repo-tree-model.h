@@ -45,6 +45,7 @@ public:
         CAT_INDEX_PUBLIC_REPOS,
         CAT_INDEX_GROUP_REPOS,
         CAT_INDEX_SYNCED_REPOS,
+        CAT_INDEX_PDM_REPOS,
     };
 
     RepoTreeModel(QObject *parent=0);
@@ -68,6 +69,7 @@ private slots:
 
 private:
     void checkPersonalRepo(const ServerRepo& repo);
+    void checkPdmRepo(const ServerRepo& repo);
     void checkVirtualRepo(const ServerRepo& repo);
     void checkSharedRepo(const ServerRepo& repo);
     void checkOrgRepo(const ServerRepo& repo);
@@ -99,6 +101,7 @@ private:
     RepoCategoryItem *org_repos_category_;
     RepoCategoryItem *groups_root_category_;
     RepoCategoryItem *synced_repos_category_;
+    RepoCategoryItem *pdm_repos_category_;
 
     QTimer *refresh_local_timer_;
 

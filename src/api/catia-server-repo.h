@@ -1,5 +1,5 @@
-#ifndef SEAFILE_CLIENT_SERVER_REPO_H
-#define SEAFILE_CLIENT_SERVER_REPO_H
+#ifndef SEAFILE_CLIENT_CATIA_SERVER_REPO_H
+#define SEAFILE_CLIENT_CATIA_SERVER_REPO_H
 
 #include <vector>
 #include <QString>
@@ -14,9 +14,9 @@
 /**
  * Repo information from seahub api
  */
-class ServerRepo {
+class CatiaServerRepo {
 public:
-    ServerRepo() : encrypted(false), readonly(false), _virtual(false), group_id (0) {};
+    CatiaServerRepo() : encrypted(false), readonly(false), _virtual(false), group_id (0) {};
 
     QString id;
     QString name;
@@ -42,9 +42,6 @@ public:
     QString permission;
     QString group_name;
     int group_id;
-    QString repo_id;
-    QString path;
-    int biz = 0;
 
     bool isValid() const { return !id.isEmpty(); }
 
@@ -52,7 +49,6 @@ public:
     bool isSharedRepo() const { return type == "srepo"; }
     bool isGroupRepo() const { return type == "grepo"; }
     bool isOrgRepo() const { return isGroupRepo() and group_id == 0; }
-    bool isPdmRepo() const { return type == "pdm"; }
 
     bool isVirtual() const { return _virtual; }
     bool isSubfolder() const { return !parent_repo_id.isEmpty() && !parent_path.isEmpty(); }
@@ -60,15 +56,15 @@ public:
     QIcon getIcon() const;
     QPixmap getPixmap(int size = 24) const;
 
-    static ServerRepo fromJSON(const json_t*, json_error_t *error);
-    static std::vector<ServerRepo> listFromJSON(const json_t*, json_error_t *json);
+    static CatiaServerRepo fromJSON(const json_t*, json_error_t *error);
+    static std::vector<CatiaServerRepo> listFromJSON(const json_t*, json_error_t *json);
 };
 
 
 /**
  * Register with QMetaType so we can wrap it with QVariant::fromValue
  */
-Q_DECLARE_METATYPE(ServerRepo)
+Q_DECLARE_METATYPE(CatiaServerRepo)
 
 
-#endif // SEAFILE_CLIENT_SERVER_REPO_H
+#endif // SEAFILE_CLIENT_CATIA_SERVER_REPO_H

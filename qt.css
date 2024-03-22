@@ -139,6 +139,27 @@ QLineEdit#mSearchBar:focus {
     color: #525252;
 }
 
+QLineEdit#mCatiaSearchBar {
+    min-height: 30px;
+    max-height: 30px;
+    margin-left: 16px;
+    margin-right: 16px;
+    margin-top: 0;
+    margin-bottom: 0px;
+    padding: 0 0px;
+    border: 1px solid #E0E0E0;
+    border-radius: 3px;
+}
+
+QLineEdit#mCatiaSearchBar QLabel {
+    text-align: center;
+    margin-left: 16px;
+    margin-right: 16px;
+}
+
+QLineEdit#mCatiaSearchBar:focus {
+    color: #525252;
+}
 
 RepoTreeView QScrollBar {
     margin-right: 1px;
@@ -420,9 +441,39 @@ QWidget#EventsContainerView LoadingView {
     margin: 0;
 }
 
+QWidget#CatiaEventsContainerView {
+    margin: 0;
+    border: 0;
+    /*border-top: 1px solid #DCDCDE;*/
+    /*margin-left: 16px;*/
+    /*margin-right: 16px;*/
+    /*margin-top: 0;*/
+    /*margin-bottom: 0px;*/
+    /*padding: 0 0px;*/
+}
+
+QWidget#CatiaEventsContainerView LoadingView,
+QWidget#CatiaEventsContainerView QToolButton
+{
+    max-height: 40px;
+    min-height: 40px;
+}
+
+QWidget#CatiaEventsContainerView LoadingView {
+    /* border: 1px solid red; */
+    border: 0;
+    background: white;
+    margin: 0;
+}
+
 EventsListView {
     border: 0;
     border-top: 1px solid #DCDCDE;
+}
+
+CatiaEventsListView {
+    border: 0;
+    border-bottom: 1px solid #DCDCDE;
 }
 
 EventDetailsDialog {
@@ -447,7 +498,7 @@ EventDetailsListView QScrollBar {
     margin-right: 1px;
 }
 
-ActivitiesTab, EventsListView
+ActivitiesTab, EventsListView, CatiaTab
 {
     qproperty-focusPolicy: NoFocus;
 }

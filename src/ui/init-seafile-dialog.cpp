@@ -99,7 +99,7 @@ InitSeafileDialog::InitSeafileDialog(QWidget *parent)
     setupUi(this);
 
     setWindowTitle(tr("%1 Initialization").arg(getBrand()));
-    setWindowIcon(QIcon(":/images/seafile.png"));
+    setWindowIcon(QIcon(":/images/zeron.png"));
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     connect(mChooseDirBtn, SIGNAL(clicked()), this, SLOT(chooseDir()));

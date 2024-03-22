@@ -13,23 +13,15 @@
 #include "event-details-dialog.h"
 #include "utils/paint-utils.h"
 #include "utils/utils.h"
-#include "api/event.h"
+#include "api/catia-event.h"
 
-#include "events-list-view.h"
+#include "catia-events-list-view.h"
 
 namespace {
 
-// new file activities ui
+// new file catia ui
 /**
-         nick    operation     date
-   icon
-         description  repo name
- */
-
-/**
-         nick         date
-   icon
-         description  repo name
+ * nick operation  date icon  description  repo name
  */
 
 const int kMarginLeft = 5;
@@ -68,8 +60,8 @@ const int kOperationFontSize = 13;
 const int kDescriptionFontSize = 13;
 const int kDescriptionHeight = 30;
 
-const char *kEventItemBackgroundColor = "white";
-const char *kEventItemBackgroundColorHighlighted = "#F9E0C7";
+const char *kCatiaEventItemBackgroundColor = "white";
+const char *kCatiaEventItemBackgroundColorHighlighted = "#F9E0C7";
 
 const int kTimeWidth = 100;
 const int kTimeHeight = 30;
@@ -92,38 +84,38 @@ const char *kItemBottomBorderColor = "#EEE";
 
 
 
-EventItem::EventItem(const SeafEvent& event)
+CatiaEventItem::CatiaEventItem(const CatiaEvent& event)
     : event_(event)
 {
 }
 
-EventItemDelegate::EventItemDelegate(QObject *parent)
+CatiaEventItemDelegate::CatiaEventItemDelegate(QObject *parent)
     : QStyledItemDelegate(parent)
 {
 }
 
-void EventItemDelegate::paint(QPainter *painter,
+void CatiaEventItemDelegate::paint(QPainter *painter,
                               const QStyleOptionViewItem& option,
                               const QModelIndex& index) const
 {
     QBrush backBrush;
     bool selected = false;
 
-    EventItem *item = getItem(index);
+    CatiaEventItem *item = getItem(index);
     if (!item) {
         return;
     }
 
-    const SeafEvent& event = item->event();
+    const CatiaEvent& event = item->event();
     QString operation_text = event.op_desc;
     QString time_text = translateCommitTime(event.timestamp);
 
     if (option.state & (QStyle::State_HasFocus | QStyle::State_Selected)) {
-        backBrush = QColor(kEventItemBackgroundColorHighlighted);
+        backBrush = QColor(kCatiaEventItemBackgroundColorHighlighted);
         selected = true;
 
     } else {
-        backBrush = QColor(kEventItemBackgroundColor);
+        backBrush = QColor(kCatiaEventItemBackgroundColor);
     }
 
     painter->save();
@@ -280,7 +272,7 @@ void EventItemDelegate::paint(QPainter *painter,
         &event_repo_name_rect);
     painter->restore();
 
-    // const EventsListModel *model = (const EventsListModel*)index.model();
+    // const CatiaEventsListModel *model = (const CatiaEventsListModel*)index.model();
     //
     // Draw the bottom border lines except for the last item (if the "load more" is present")
     // We minus 2 here becase:
@@ -300,73 +292,73 @@ void EventItemDelegate::paint(QPainter *painter,
     painter->restore();
 }
 
-QSize EventItemDelegate::sizeHint(const QStyleOptionViewItem& option,
+QSize CatiaEventItemDelegate::sizeHint(const QStyleOptionViewItem& option,
                                   const QModelIndex& index) const
 {
     int height = kNickHeight + kDescriptionHeight + kPadding * 4 - kExtraPadding;
     return QSize(option.rect.width(), height);
 }
 
-EventItem*
-EventItemDelegate::getItem(const QModelIndex &index) const
+CatiaEventItem*
+CatiaEventItemDelegate::getItem(const QModelIndex &index) const
 {
     if (!index.isValid()) {
         return NULL;
     }
-    const EventsListModel *model = (const EventsListModel*)index.model();
+    const CatiaEventsListModel *model = (const CatiaEventsListModel*)index.model();
     QStandardItem *qitem = model->itemFromIndex(index);
     if (qitem->type() == EVENT_ITEM_TYPE) {
-        return (EventItem *)qitem;
+        return (CatiaEventItem *)qitem;
     } else {
         return NULL;
     }
 }
 
-EventsListView::EventsListView(QWidget *parent)
+CatiaEventsListView::CatiaEventsListView(QWidget *parent)
     : QListView(parent)
 {
-    setItemDelegate(new EventItemDelegate);
+    setItemDelegate(new CatiaEventItemDelegate);
     connect(this, SIGNAL(doubleClicked(const QModelIndex&)),
             this, SLOT(onItemDoubleClicked(const QModelIndex&)));
 
     setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
-EventItem*
-EventsListView::getItem(const QModelIndex &index) const
+CatiaEventItem*
+CatiaEventsListView::getItem(const QModelIndex &index) const
 {
     if (!index.isValid()) {
         return NULL;
     }
-    const EventsListModel *model = (const EventsListModel*)index.model();
+    const CatiaEventsListModel *model = (const CatiaEventsListModel*)index.model();
     QStandardItem *qitem = model->itemFromIndex(index);
     if (qitem->type() == EVENT_ITEM_TYPE) {
-        return (EventItem *)qitem;
+        return (CatiaEventItem *)qitem;
     }
     return NULL;
 }
 
-void EventsListView::onItemDoubleClicked(const QModelIndex& index)
+void CatiaEventsListView::onItemDoubleClicked(const QModelIndex& index)
 {
-    EventItem *item = getItem(index);
+    CatiaEventItem *item = getItem(index);
     if (!item) {
         return;
     }
-// TODO
-//    const SeafEvent& event = item->event();
-//
-//    if (!event.isDetailsDisplayable()) {
-//        return;
-//    }
-//
-//    EventDetailsDialog* dialog = new EventDetailsDialog(event, seafApplet->mainWindow());
-//    dialog->setAttribute(Qt::WA_DeleteOnClose, true);
-//    dialog->show();
-//    dialog->raise();
-//    dialog->activateWindow();
+
+    const CatiaEvent& event = item->event();
+
+    if (!event.isDetailsDisplayable()) {
+        return;
+    }
+
+    EventDetailsDialog* dialog = new EventDetailsDialog(event, seafApplet->mainWindow());
+    dialog->setAttribute(Qt::WA_DeleteOnClose, true);
+    dialog->show();
+    dialog->raise();
+    dialog->activateWindow();
 }
 
-bool EventsListView::viewportEvent(QEvent *event)
+bool CatiaEventsListView::viewportEvent(QEvent *event)
 {
     if (event->type() != QEvent::ToolTip && event->type() != QEvent::WhatsThis) {
         return QListView::viewportEvent(event);
@@ -379,7 +371,7 @@ bool EventsListView::viewportEvent(QEvent *event)
         return true;
     }
 
-    EventItem *item = getItem(index);
+    CatiaEventItem *item = getItem(index);
     if (!item) {
         return true;
     }
@@ -396,13 +388,13 @@ bool EventsListView::viewportEvent(QEvent *event)
 }
 
 
-EventsListModel::EventsListModel(QObject *parent)
+CatiaEventsListModel::CatiaEventsListModel(QObject *parent)
     : QStandardItemModel(parent)
 {
 }
 
 const QModelIndex
-EventsListModel::updateEvents(const std::vector<SeafEvent>& events,
+CatiaEventsListModel::updateEvents(const std::vector<CatiaEvent>& events,
                               bool is_loading_more,
                               bool has_more)
 {
@@ -411,11 +403,11 @@ EventsListModel::updateEvents(const std::vector<SeafEvent>& events,
     }
     int i = 0, n = events.size();
 
-    EventItem *first_item = 0;
+    CatiaEventItem *first_item = 0;
 
     for (i = 0; i < n; i++) {
-        SeafEvent event = events[i];
-        EventItem *item = new EventItem(event);
+        CatiaEvent event = events[i];
+        CatiaEventItem *item = new CatiaEventItem(event);
 
         appendRow(item);
 
@@ -437,7 +429,7 @@ EventsListModel::updateEvents(const std::vector<SeafEvent>& events,
     return QModelIndex();
 }
 
-void EventsListModel::onAvatarUpdated(const QString& email, const QImage& img)
+void CatiaEventsListModel::onAvatarUpdated(const QString& email, const QImage& img)
 {
     int i, n = rowCount();
 
@@ -446,7 +438,7 @@ void EventsListModel::onAvatarUpdated(const QString& email, const QImage& img)
         if (qitem->type() != EVENT_ITEM_TYPE) {
             return;
         }
-        EventItem *item = (EventItem *)qitem;
+        CatiaEventItem *item = (CatiaEventItem *)qitem;
 
         if (item->event().author == email) {
             QModelIndex index = indexFromItem(item);

@@ -14,7 +14,9 @@ class QTabWidget;
 class QUrl;
 
 class SeafileTabWidget;
-class ReposTab;
+//class ReposTab;
+class CatiaReposTab;
+class CatiaTab;
 class StarredFilesTab;
 class ActivitiesTab;
 class SearchTab;
@@ -76,7 +78,9 @@ private:
     AccountView *account_view_;
 
     SeafileTabWidget *tabs_;
-    ReposTab *repos_tab_;
+    CatiaTab *catia_tab_;
+    CatiaReposTab *catia_repos_tab_;
+//    ReposTab *repos_tab_;
     StarredFilesTab *starred_files_tab_;
     ActivitiesTab *activities_tab_;
     SearchTab *search_tab_;

@@ -62,7 +62,8 @@ bool isOutsideScreens(const QRect &rect) {
 
 MainWindow::MainWindow()
 {
-    setWindowIcon(QIcon(":/images/seafile.png"));
+//    setWindowIcon(QIcon(":/images/zeron.png"));
+    setWindowIcon(QIcon(":/images/zeron.png"));
     setWindowTitle(getBrand());
 
     // Qt::Tool hides the taskbar entry on windows

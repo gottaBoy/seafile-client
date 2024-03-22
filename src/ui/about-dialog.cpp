@@ -10,7 +10,7 @@ AboutDialog::AboutDialog(QWidget *parent)
 {
     setupUi(this);
     setWindowTitle(tr("About %1").arg(getBrand()));
-    setWindowIcon(QIcon(":/images/seafile.png"));
+    setWindowIcon(QIcon(":/images/zeron.png"));
     setWindowFlags((windowFlags() & ~Qt::WindowContextHelpButtonHint) |
                    Qt::WindowStaysOnTopHint);
 

@@ -25,6 +25,8 @@ public:
     void setHeader(const QString& key, const QString& value);
     void get(const QUrl& url);
     void post(const QUrl& url, const QByteArray& body, bool is_put);
+    void deleteWithBody(const QUrl& url, const QByteArray& body);
+//    void sendCustomRequest(const QUrl& url, const QByteArray& body);
     void deleteResource(const QUrl& url);
     void setUseCache(bool use_cache) { use_cache_ = use_cache; }
 

@@ -8,12 +8,14 @@
 #include "QtAwesome.h"
 #include "account-mgr.h"
 #include "account-view.h"
+#include "catia-tab.h"
 #include "activities-tab.h"
 #include "clone-tasks-dialog.h"
 #include "create-repo-dialog.h"
 #include "customization-service.h"
 #include "main-window.h"
 #include "repos-tab.h"
+#include "catia-repos-tab.h"
 #include "rpc/rpc-client.h"
 #include "seafile-applet.h"
 #include "seafile-tab-widget.h"
@@ -42,7 +44,9 @@ const char* kDrapInnerBorderColor = "#E4E4E4";
 const char* kDrapEnterBorderColor = "#ED6C00";
 
 enum {
-    TAB_INDEX_REPOS = 0,
+//    TAB_INDEX_REPOS = 0,
+    TAB_INDEX_CATIA_REPOS = 0,
+//    TAB_INDEX_CATIA,
     TAB_INDEX_STARRED_FILES,
     TAB_INDEX_ACTIVITIES,
     TAB_INDEX_SEARCH,
@@ -100,7 +104,7 @@ CloudView::CloudView(QWidget* parent)
     // actions are provided by the tabs
     // createToolBar();
 
-    setupDropArea();
+     setupDropArea();
 
     setupFooter();
 
@@ -173,13 +177,24 @@ void CloudView::createTabs()
     tabs_ = new SeafileTabWidget;
     // tabs_ = new QTabWidget;
 
-    repos_tab_ = new ReposTab;
-
     QString base_icon_path = ":/images/tabs/";
     QString highlighted_base_icon_path = ":/images/tabs/highlighted/";
-    tabs_->addTab(repos_tab_, tr("Libraries"),
+
+    // TODO catia
+//    repos_tab_ = new ReposTab;
+//    tabs_->addTab(repos_tab_, tr("Libraries"),
+//                  base_icon_path + "library-normal.png",
+//                  highlighted_base_icon_path + "library-orange.png");
+
+    catia_repos_tab_ = new CatiaReposTab;
+    tabs_->addTab(catia_repos_tab_, tr("Libraries"),
                   base_icon_path + "library-normal.png",
                   highlighted_base_icon_path + "library-orange.png");
+
+//    catia_tab_ = new CatiaTab;
+//    tabs_->addTab(catia_tab_, tr("Catia"),
+//                  base_icon_path + "catia-normal.png",
+//                  base_icon_path + "catia-normal.png");
 
     starred_files_tab_ = new StarredFilesTab;
     tabs_->addTab(starred_files_tab_, tr("Starred"),
@@ -187,8 +202,14 @@ void CloudView::createTabs()
                   highlighted_base_icon_path + "star-orange.png");
 
     activities_tab_ = new ActivitiesTab;
+//    tabs_->addTab(activities_tab_, tr("History"),
+//                  base_icon_path + "history-normal.png",
+//                  highlighted_base_icon_path + "history-orange.png");
 
     search_tab_ = new SearchTab;
+//    tabs_->addTab(search_tab_, tr("Search"),
+//                  base_icon_path + "search-normal.png",
+//                  highlighted_base_icon_path + "search-orange.png");
 
     connect(tabs_, SIGNAL(currentTabChanged(int)), this,
             SLOT(onTabChanged(int)));
@@ -203,7 +224,9 @@ void CloudView::createTabs()
 
 void CloudView::setupDropArea()
 {
+    // TODO catia
     mDropArea->setAcceptDrops(true);
+    mDropArea->setVisible(false);
     mDropArea->installEventFilter(this);
     connect(mSelectFolderBtn, SIGNAL(clicked()), this,
             SLOT(chooseFolderToSync()));
@@ -267,13 +290,14 @@ void CloudView::showCreateRepoDialog(const QString& path)
         return;
     }
 
-    CreateRepoDialog* dialog =
-        new CreateRepoDialog(accounts[0], path, repos_tab_, this);
-
-    dialog->setAttribute(Qt::WA_DeleteOnClose);
-    dialog->show();
-    dialog->raise();
-    dialog->activateWindow();
+    // TODO
+//    CreateRepoDialog* dialog =
+//        new CreateRepoDialog(accounts[0], path, repos_tab_, this);
+//
+//    dialog->setAttribute(Qt::WA_DeleteOnClose);
+//    dialog->show();
+//    dialog->raise();
+//    dialog->activateWindow();
 }
 
 void CloudView::onMinimizeBtnClicked()
@@ -448,9 +472,16 @@ void CloudView::showServerStatusDialog()
 
 void CloudView::onRefreshClicked()
 {
-    if (tabs_->currentIndex() == TAB_INDEX_REPOS) {
-        repos_tab_->refresh();
+    // TODO catia
+//    if (tabs_->currentIndex() == TAB_INDEX_REPOS) {
+//        repos_tab_->refresh();
+//    }
+    if (tabs_->currentIndex() == TAB_INDEX_CATIA_REPOS) {
+        catia_repos_tab_->refresh();
     }
+//    else if (tabs_->currentIndex() == TAB_INDEX_CATIA) {
+//        catia_tab_->refresh();
+//    }
     else if (tabs_->currentIndex() == TAB_INDEX_STARRED_FILES) {
         starred_files_tab_->refresh();
     }
@@ -521,7 +552,10 @@ void CloudView::onAccountChanged()
 
     showProperTabs();
 
-    repos_tab_->refresh();
+    // TODO catia
+    // repos_tab_->refresh();
+    catia_repos_tab_->refresh();
+//    catia_tab_->refresh();
     starred_files_tab_->refresh();
     if (seafApplet->accountManager()->currentAccount().isPro()) {
         activities_tab_->refresh();
@@ -611,7 +645,9 @@ void CloudView::onTabChanged(int index)
                                             .hasDisableSyncWithAnyFolder();
     bool drop_area_visible = index == 0;
     if (enable_sync_with_any_folder && drop_area_visible) {
-        mDropArea->setVisible(true);
+        // TODO catia
+        // mDropArea->setVisible(true);
+        mDropArea->setVisible(false);
         mFooter->setStyleSheet("");
     }
     else {

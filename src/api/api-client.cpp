@@ -146,6 +146,27 @@ void SeafileApiClient::post(const QUrl& url, const QByteArray& data, bool is_put
             this, SLOT(onSslErrors(const QList<QSslError>&)));
 }
 
+void SeafileApiClient::deleteWithBody(const QUrl& url, const QByteArray& data)
+{
+    body_ = data;
+    QNetworkRequest request(url);
+    prepareRequest(&request);
+
+    if (!headers_.contains("Content-Type")) {
+        request.setHeader(QNetworkRequest::ContentTypeHeader, kContentTypeForm);
+    }
+    reply_ = qnam_->sendCustomRequest(request, "DELETE", body_);
+
+    reply_->setParent(this);
+
+    connect(reply_, SIGNAL(finished()), this, SLOT(httpRequestFinished()));
+
+    connect(reply_, SIGNAL(sslErrors(const QList<QSslError>&)),
+            this, SLOT(onSslErrors(const QList<QSslError>&)));
+}
+
+//QNetworkReply *sendCustomRequest(const QNetworkRequest &request, const QByteArray &verb, const QByteArray &data);
+
 void SeafileApiClient::deleteResource(const QUrl& url)
 {
     QNetworkRequest request(url);

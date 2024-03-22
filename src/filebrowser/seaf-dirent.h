@@ -29,6 +29,13 @@ public:
     quint64 lock_time;
     QString modifier_name;
 
+    // zeron
+    QString zeron_code;
+    QString version;
+    QString part_name;
+    QString suffix = ".part";
+    bool is_push = false;
+
     bool isDir() const { return type == DIR; }
     bool isFile() const { return type == FILE; }
 

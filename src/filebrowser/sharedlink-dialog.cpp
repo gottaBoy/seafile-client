@@ -16,7 +16,7 @@ SharedLinkDialog::SharedLinkDialog(const QString& link, const QString &repo_id,
     path_in_repo_(path_in_repo)
 {
     setWindowTitle(tr("Share Link"));
-    setWindowIcon(QIcon(":/images/seafile.png"));
+    setWindowIcon(QIcon(":/images/zeron.png"));
     setWindowFlags((windowFlags() & ~Qt::WindowContextHelpButtonHint) |
                    Qt::WindowStaysOnTopHint);
     QVBoxLayout *layout = new QVBoxLayout;

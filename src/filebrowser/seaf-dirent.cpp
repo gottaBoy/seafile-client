@@ -41,6 +41,16 @@ SeafDirent SeafDirent::fromJSON(const json_t *root, json_error_t */* error */)
     dirent.locked_by_me = json.getBool("locked_by_me");
     dirent.modifier_name = json.getString("modifier_name");
 
+    // TODO
+    dirent.zeron_code = json.getString("zeronCode");
+    dirent.version = json.getString("version");
+    if (!dirent.zeron_code.isEmpty()) {
+        dirent.id = dirent.zeron_code + "_" + dirent.version;
+        dirent.part_name = dirent.name;
+        dirent.name = dirent.id;
+        dirent.type = FILE;
+    }
+
     return dirent;
 }
 

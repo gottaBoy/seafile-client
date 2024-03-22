@@ -16,7 +16,7 @@ class GetDirentsRequest : public SeafileApiRequest {
 public:
     GetDirentsRequest(const Account& account,
                       const QString& repo_id,
-                      const QString& path);
+                      const QString& path, const int biz = 0);
 
     const QString& repoId() const { return repo_id_; }
     const QString& path() const { return path_; }
@@ -30,6 +30,31 @@ protected slots:
 
 private:
     Q_DISABLE_COPY(GetDirentsRequest)
+
+    const QString repo_id_;
+    const QString path_;
+    bool readonly_;
+};
+
+class GetRepoFilesRequest : public SeafileApiRequest {
+    Q_OBJECT
+public:
+    GetRepoFilesRequest(const Account& account,
+                      const QString& repo_id,
+                      const QString& path, const int biz = 0);
+
+    const QString& repoId() const { return repo_id_; }
+    const QString& path() const { return path_; }
+
+signals:
+    void success(const QList<SeafDirent> &dirents, const QString& repo_id);
+    void failed(const ApiError& error, const QString& repo_id);
+
+protected slots:
+    void requestSuccess(QNetworkReply& reply);
+
+private:
+    Q_DISABLE_COPY(GetRepoFilesRequest)
 
     const QString repo_id_;
     const QString path_;
@@ -388,6 +413,27 @@ private:
     const QString dst_repo_id_;
     const QString dst_repo_path_;
     Q_DISABLE_COPY(AsyncMoveMultipleItemsRequest)
+};
+
+class BatchDeleteMultipleItemsRequest : public SeafileApiRequest {
+    Q_OBJECT
+public:
+    BatchDeleteMultipleItemsRequest(const Account &account,
+                                    const QString &repo_id,
+                                    const QString &parent_dir,
+                                    const QStringList &dirents);
+signals:
+    void success(bool success);
+
+protected slots:
+    void requestSuccess(QNetworkReply& reply);
+
+private:
+    const Account& account_;
+    const QString repo_id_;
+    const QString parent_dir_;
+    QStringList dirents_;
+    Q_DISABLE_COPY(BatchDeleteMultipleItemsRequest)
 };
 
 class StarFileRequest : public SeafileApiRequest {

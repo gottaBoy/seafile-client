@@ -12,7 +12,7 @@ SetRepoPasswordDialog::SetRepoPasswordDialog(const ServerRepo& repo, QWidget *pa
 {
     setupUi(this);
     setWindowTitle(tr("Please provide the library password"));
-    setWindowIcon(QIcon(":/images/seafile.png"));
+    setWindowIcon(QIcon(":/images/zeron.png"));
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     request_ = 0;

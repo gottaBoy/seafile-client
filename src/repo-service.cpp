@@ -120,6 +120,7 @@ RepoService::RepoService(QObject *parent)
     refresh_timer_ = new QTimer(this);
     connect(refresh_timer_, SIGNAL(timeout()), this, SLOT(refresh()));
     list_repo_req_ = NULL;
+    list_pdm_repo_req_ = NULL;
     in_refresh_ = false;
     wipe_in_progress_ = false;
 }
@@ -188,8 +189,86 @@ void RepoService::refreshLocalRepoList() {
     }
 }
 
+void RepoService::getPdm()
+{
+    const std::vector<Account>& accounts = seafApplet->accountManager()->accounts();
+    if (accounts.empty()) {
+        return;
+    }
+    const Account *account = &accounts.front();
+    if (!account->isValid())
+        return;
+
+    if (pdm_repos_.empty()) {
+        list_pdm_repo_req_ = new ListPdmReposRequest(*account, 1);
+        connect(list_pdm_repo_req_, SIGNAL(success(const std::vector<ServerRepo>&)),
+                this, SLOT(onListPdmSuccess(const std::vector<ServerRepo>&)));
+
+        connect(list_pdm_repo_req_, SIGNAL(failed(const ApiError&)),
+                this, SLOT(onListPdmFailed(const ApiError&)));
+        list_pdm_repo_req_->send();
+    }
+}
+
+void RepoService::onListPdmSuccess(const std::vector<ServerRepo>& repos)
+{
+    if (repos.empty()) {
+        return;
+    }
+    pdm_repos_ = repos;
+    if (!pdm_repos_.empty()) {
+        refresh();
+    }
+}
+
+void RepoService::onListPdmFailed(const ApiError& error)
+{
+    // TODO
+    qWarning ("ListPdm error\n");
+}
+
+void RepoService::getEbom()
+{
+    const std::vector<Account>& accounts = seafApplet->accountManager()->accounts();
+    if (accounts.empty()) {
+        return;
+    }
+    const Account *account = &accounts.front();
+    if (!account->isValid())
+        return;
+
+    if (pdm_repos_.empty()) {
+        list_ebom_repo_req_ = new ListEbomReposRequest(*account, 1);
+    }
+    connect(list_ebom_repo_req_, SIGNAL(success(const QList<SeafDirent> &)),
+            this, SLOT(onListEbomSuccess(const QList<SeafDirent> &)));
+
+    connect(list_ebom_repo_req_, SIGNAL(failed(const ApiError&)),
+            this, SLOT(onListEbomFailed(const ApiError&)));
+    list_ebom_repo_req_->send();
+}
+
+void RepoService::onListEbomSuccess(const QList<SeafDirent> &dirents)
+{
+    if (dirents.empty()) {
+        return;
+    }
+    ebom_dirents_ = dirents;
+    // refresh();
+}
+
+void RepoService::onListEbomFailed(const ApiError& error)
+{
+    // TODO
+    qWarning ("ListEbom error\n");
+}
+
 void RepoService::refresh()
 {
+    if (pdm_repos_.empty()) {
+        qWarning("pdm repos is empty\n");
+        return;
+    }
     if (in_refresh_) {
         return;
     }
@@ -260,11 +339,55 @@ void RepoService::refresh()
     list_repo_req_->send();
 }
 
+//void RepoService::onRefreshSuccess(const std::vector<ServerRepo>& repos)
+//{
+//    in_refresh_ = false;
+//
+//    server_repos_ = repos;
+//
+//    OpenLocalHelper::instance()->checkPendingOpenLocalRequest();
+//
+//    // if we have local repo missed in server_repos
+//    // start a GetRepoRequest for it
+//    for (size_t i = 0; i < synced_subfolders_.size(); ++i) {
+//        bool found = false;
+//        for (size_t j = 0; j < server_repos_.size(); ++j) {
+//            if (synced_subfolders_[i].repoId() == server_repos_[j].id) {
+//                found = true;
+//                server_repos_[j].parent_repo_id = synced_subfolders_[i].parentRepoId();
+//                server_repos_[j].parent_path = synced_subfolders_[i].parentPath();
+//                break;
+//            }
+//        }
+//        // create GetRepoRequest
+//        if (!found)
+//            startGetRequestFor(synced_subfolders_[i].repoId());
+//    }
+//
+//    if (get_repo_reqs_.empty())
+//        emit refreshSuccess(repos);
+//}
+
 void RepoService::onRefreshSuccess(const std::vector<ServerRepo>& repos)
 {
     in_refresh_ = false;
 
-    server_repos_ = repos;
+    //    server_repos_ = repos;
+    std::vector<ServerRepo> catia_repos;
+    const Account account = seafApplet->accountManager()->currentAccount();
+    if (account.isValid()) {
+        for (ServerRepo repo: repos) {
+            if (repo.name == account.accountInfo.name) {
+                repo.repo_id = repo.id;
+                my_repos_.push_back(repo);
+                catia_repos.push_back(repo);
+            } else if (isGrepos(repo)) {
+                catia_repos.push_back(repo);
+            }
+        }
+    }
+
+    server_repos_ = catia_repos;
 
     OpenLocalHelper::instance()->checkPendingOpenLocalRequest();
 
@@ -286,7 +409,22 @@ void RepoService::onRefreshSuccess(const std::vector<ServerRepo>& repos)
     }
 
     if (get_repo_reqs_.empty())
-        emit refreshSuccess(repos);
+        // TODO catia
+        // emit refreshSuccess(repos);
+        emit refreshSuccess(catia_repos);
+}
+
+bool RepoService::isGrepos(const ServerRepo& repo)
+{
+    if (pdm_repos_.empty()) {
+        return false;
+    }
+    for (ServerRepo serverRepo: pdm_repos_) {
+        if (repo.id == serverRepo.repo_id && repo.name == serverRepo.name) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void RepoService::onRefreshFailed(const ApiError& error)
@@ -298,6 +436,7 @@ void RepoService::onRefreshFailed(const ApiError& error)
         // TODO: Remote wipe should be managed in a separate module, not here.
         if (!wipe_in_progress_) {
             wipe_in_progress_ = true;
+            // TODO catia
             wipeLocalFiles();
         }
         return;
@@ -319,6 +458,10 @@ void RepoService::onRefreshFailed(const ApiError& error)
 
 void RepoService::refresh(bool force)
 {
+    if (pdm_repos_.empty()) {
+        qWarning("pdm repos is empty\n");
+        return;
+    }
     if (!force || !in_refresh_) {
         refresh();
         return;
@@ -341,6 +484,27 @@ RepoService::getRepo(const QString& repo_id) const
     }
 
     return ServerRepo();
+}
+
+ServerRepo RepoService::getPdmRepo() const
+{
+    if (pdm_repos_.empty()) {
+        return ServerRepo();
+    }
+    return pdm_repos_[0];
+}
+
+QList<SeafDirent> RepoService::getEbomRepos() const
+{
+    return ebom_dirents_;
+}
+
+ServerRepo RepoService::getMyRepo() const
+{
+    if (my_repos_.empty()) {
+        return ServerRepo();
+    }
+    return my_repos_[0];
 }
 
 void RepoService::openLocalFile(const QString& repo_id,
@@ -395,6 +559,7 @@ void RepoService::openFolder(const QString &repo_id,
     if (r.isValid()) {
         QString local_path = ::pathJoin(r.worktree, path_in_repo);
 
+        // TODO
         FileDownloadHelper::openFile(local_path, false);
     } else {
         QString fixed_path = path_in_repo == "." ? "/" : path_in_repo;
@@ -525,6 +690,7 @@ void RepoService::removeSyncedSubfolder(const QString& repo_id)
 
 void RepoService::removeCloudFileBrowserCache()
 {
+    // TODO
     QList<FileCache::CacheEntry> all_files =
         FileCache::instance()->getAllCachedFiles();
     const Account account = seafApplet->accountManager()->currentAccount();
@@ -550,6 +716,7 @@ void WipeFilesThread::run()
                   toCStr(repo.name),
                   toCStr(repo.worktree));
         if (repo.worktree.length() > 1) {
+            // TODO
             delete_dir_recursively(repo.worktree);
         }
     }

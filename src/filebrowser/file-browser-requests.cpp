@@ -28,6 +28,7 @@ const char kCopyMoveSingleItemUrl[] = "api/v2.1/copy-move-task/";
 const char kFileOperationCopy[] = "api2/repos/%1/fileops/copy/";
 const char kAsyncCopyMultipleItems[] = "api/v2.1/repos/async-batch-copy-item/";
 const char kAsyncMoveMultipleItems[] = "api/v2.1/repos/async-batch-move-item/";
+const char kBatchDeleteMultipleItems[] = "api/v2.1/repos/batch-delete-item/";
 const char kFileOperationMove[] = "api2/repos/%1/fileops/move/";
 const char kRemoveDirentsURL[] = "api2/repos/%1/fileops/delete/";
 const char kGetFileUploadedBytesUrl[] = "api/v2.1/repos/%1/file-uploaded-bytes/";
@@ -37,6 +38,8 @@ const char kGetUploadLinkUrl[] = "api/v2.1/upload-links/";
 //const char kGetFileFromRevisionUrl[] = "api2/repos/%1/file/revision/";
 //const char kGetFileDetailUrl[] = "api2/repos/%1/file/detail/";
 //const char kGetFileHistoryUrl[] = "api2/repos/%1/file/history/";
+//const char kGetPdmDirentsUrl[] = "http://mock.apifox.com/m1/4073466-0-default/api/pdm/dir/list";
+
 
 QByteArray assembleJsonReq(const QString&  repo_id, const QString& src_dir_path,
                            const QStringList& src_file_names, const QString& dst_repo_id,
@@ -62,21 +65,29 @@ QByteArray assembleJsonReq(const QString&  repo_id, const QString& src_dir_path,
 
 GetDirentsRequest::GetDirentsRequest(const Account& account,
                                      const QString& repo_id,
-                                     const QString& path)
+                                     const QString& path, const int biz)
     : SeafileApiRequest (account.getAbsoluteUrl(QString(kGetDirentsUrl).arg(repo_id)),
-                         SeafileApiRequest::METHOD_GET, account.token),
+//    : SeafileApiRequest (biz == 1 ? QString(kGetPdmDirentsUrl) : account.getAbsoluteUrl(QString(kGetDirentsUrl).arg(repo_id)),
+                         SeafileApiRequest::METHOD_GET, account.token, biz),
       repo_id_(repo_id), path_(path), readonly_(false)
 {
-    setUrlParam("p", path);
+//    if (biz == 1) {
+//        setUrlParam("page_num", QString::number(1));
+//        setUrlParam("page_size", QString::number(10000));
+//    } else {
+        setUrlParam("p", path);
+//    }
 }
 
 void GetDirentsRequest::requestSuccess(QNetworkReply& reply)
 {
     json_error_t error;
-    QString dir_id = reply.rawHeader("oid");
-    if (dir_id.length() != 40) {
-        emit failed(ApiError::fromHttpError(500), repo_id_);
-        return;
+    if (this->biz == 0) {
+        QString dir_id = reply.rawHeader("oid");
+        if (dir_id.length() != 40) {
+            emit failed(ApiError::fromHttpError(500), repo_id_);
+            return;
+        }
     }
     // this extra header column only supported from v4.2 seahub
     readonly_ = reply.rawHeader("dir_perm") == "r";
@@ -91,8 +102,50 @@ void GetDirentsRequest::requestSuccess(QNetworkReply& reply)
     QScopedPointer<json_t, JsonPointerCustomDeleter> json(root);
 
     QList<SeafDirent> dirents;
+//    if (biz == 1) {
+//        json_t* array = json_object_get(json.data(), "data");
+//        dirents = SeafDirent::listFromJSON(array, &error);
+//    } else {
     dirents = SeafDirent::listFromJSON(json.data(), &error);
+//    }
+
     emit success(readonly_, dirents, repo_id_);
+}
+
+GetRepoFilesRequest::GetRepoFilesRequest(const Account& account,
+                                     const QString& repo_id,
+                                     const QString& path, const int biz)
+    : SeafileApiRequest (account.getAbsoluteUrl(QString(kGetDirentsUrl).arg(repo_id)),
+                        SeafileApiRequest::METHOD_GET, account.token, biz),
+      repo_id_(repo_id), path_(path), readonly_(false)
+{
+    setUrlParam("p", path);
+    setUrlParam("t", QString("f"));
+}
+
+void GetRepoFilesRequest::requestSuccess(QNetworkReply& reply)
+{
+    json_error_t error;
+    QString dir_id = reply.rawHeader("oid");
+    if (dir_id.length() != 40) {
+        emit failed(ApiError::fromHttpError(500), repo_id_);
+        return;
+    }
+    // this extra header column only supported from v4.2 seahub
+    readonly_ = reply.rawHeader("dir_perm") == "r";
+
+    json_t *root = parseJSON(reply, &error);
+    if (!root) {
+        qDebug("GetRepoFilesRequest: failed to parse json:%s\n", error.text);
+        emit failed(ApiError::fromJsonError(), repo_id_);
+        return;
+    }
+
+    QScopedPointer<json_t, JsonPointerCustomDeleter> json(root);
+
+    QList<SeafDirent> dirents;
+    dirents = SeafDirent::listFromJSON(json.data(), &error);
+    emit success(dirents, repo_id_);
 }
 
 GetFileDownloadLinkRequest::GetFileDownloadLinkRequest(const Account &account,
@@ -495,6 +548,49 @@ void AsyncMoveMultipleItemsRequest::requestSuccess(QNetworkReply& reply)
     Json json(root);
     QString task_id = json.getString("task_id");
     emit success(task_id);
+}
+
+BatchDeleteMultipleItemsRequest::BatchDeleteMultipleItemsRequest(const Account &account,
+                                                             const QString &repo_id,
+                                                             const QString &parent_dir,
+                                                             const QStringList &dirents)
+    : SeafileApiRequest(
+          account.getAbsoluteUrl(QString(kBatchDeleteMultipleItems)),
+          SeafileApiRequest::METHOD_DELETE, account.token),
+      account_(account),
+      repo_id_(repo_id),
+      parent_dir_(parent_dir),
+      dirents_(dirents)
+{
+    setHeader("Content-Type","application/json");
+    setHeader("Accept", "application/json");
+
+    QStringList file_names = dirents;
+    QJsonObject json_obj;
+    QJsonArray dirents_array;
+    json_obj.insert("repo_id", repo_id);
+    json_obj.insert("parent_dir", parent_dir);
+    Q_FOREACH(const QString & src_file_name, file_names) {
+        dirents_array.append(src_file_name);
+    }
+    json_obj.insert("dirents", dirents_array);
+    QJsonDocument json_document(json_obj);
+    QByteArray byte_array = json_document.toJson(QJsonDocument::Compact);
+    setRequestBody(byte_array);
+}
+
+void BatchDeleteMultipleItemsRequest::requestSuccess(QNetworkReply& reply)
+{
+    json_error_t error;
+    json_t* root = parseJSON(reply, &error);
+    if (!root) {
+        qWarning("failed to parse json:%s\n", error.text);
+        return;
+    }
+
+    Json json(root);
+    bool result = json.getBool("success");
+    emit success(result);
 }
 
 

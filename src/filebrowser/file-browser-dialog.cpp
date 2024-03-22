@@ -100,11 +100,18 @@ QString FileBrowserDialog::dir_path_to_be_pasted_from_;
 QString FileBrowserDialog::repo_id_to_be_pasted_from_;
 Account FileBrowserDialog::account_to_be_pasted_from_;
 bool FileBrowserDialog::is_copyed_when_pasted_;
+// delete and copy
+QString FileBrowserDialog::dc_source_path_;
+QString FileBrowserDialog::dc_source_repo_id_;
+QMap<QString, int> FileBrowserDialog::dc_file_names_;
+QString FileBrowserDialog::dc_dest_path_;
+QString FileBrowserDialog::dc_dest_repo_id_;
 
 FileBrowserDialog::FileBrowserDialog(const Account &account, const ServerRepo& repo, const QString &path, QWidget *parent)
     : QDialog(parent),
       account_(account),
       repo_(repo),
+      biz(repo_.biz),
       current_path_(path),
       current_readonly_(repo_.readonly),
       search_request_(NULL),
@@ -112,6 +119,11 @@ FileBrowserDialog::FileBrowserDialog(const Account &account, const ServerRepo& r
       has_password_dialog_(false)
 {
     current_lpath_ = current_path_.split('/');
+
+    ServerRepo serverRepo  = RepoService::instance()->getPdmRepo();
+    if (serverRepo.repo_id == repo.id) {
+        repo_type_ = 1;
+    }
 
     data_mgr_ = seafApplet->dataManager();
 
@@ -121,7 +133,7 @@ FileBrowserDialog::FileBrowserDialog(const Account &account, const ServerRepo& r
         title = title.arg(getBrand());
     }
     setWindowTitle(title);
-    setWindowIcon(QIcon(":/images/seafile.png"));
+    setWindowIcon(QIcon(":/images/zeron.png"));
 
     Qt::WindowFlags flags =
         (windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::Dialog) |
@@ -386,16 +398,18 @@ void FileBrowserDialog::createStatusBar()
     // Submenu's Action 1: Upload File
     upload_file_action_ = new QAction(tr("Upload files"), upload_menu_);
     connect(upload_file_action_, SIGNAL(triggered()), this, SLOT(chooseFileToUpload()));
-    upload_menu_->addAction(upload_file_action_);
+    if (!isCatiaRepos()) {
+        upload_menu_->addAction(upload_file_action_);
+    }
 
     upload_directory_action_ = new QAction(tr("Upload a directory"), upload_menu_);
     connect(upload_directory_action_, SIGNAL(triggered()), this, SLOT(chooseDirectoryToUpload()));
-    upload_menu_->addAction(upload_directory_action_);
+    // TODO upload_menu_->addAction(upload_directory_action_);
 
     // Submenu's Action 3: Make a new directory
     mkdir_action_ = new QAction(tr("Create a folder"), upload_menu_);
     connect(mkdir_action_, SIGNAL(triggered()), this, SLOT(onMkdirButtonClicked()));
-    upload_menu_->addAction(mkdir_action_);
+    // TODO upload_menu_->addAction(mkdir_action_);
 
     // Action to trigger Submenu
     upload_button_ = new QToolButton;
@@ -588,6 +602,7 @@ void FileBrowserDialog::fetchDirents(bool force_refresh)
 
     if (!force_refresh) {
         QList<SeafDirent> dirents;
+        // TODO cache
         if (data_mgr_->getDirents(repo_.id, current_path_, &dirents, &current_readonly_)) {
             updateTable(dirents);
             return;
@@ -595,7 +610,7 @@ void FileBrowserDialog::fetchDirents(bool force_refresh)
     }
 
     showLoading();
-    data_mgr_->getDirentsFromServer(repo_.id, current_path_);
+    data_mgr_->getDirentsFromServer(repo_.id, current_path_, this->biz);
 }
 
 void FileBrowserDialog::onGetDirentsSuccess(bool current_readonly, const QList<SeafDirent>& dirents)
@@ -661,6 +676,10 @@ void FileBrowserDialog::createEmptyView()
 
 void FileBrowserDialog::onDirentClicked(const SeafDirent& dirent)
 {
+    // TODO
+    if (isCatiaRepos()) {
+        return;
+    }
     if (dirent.isDir()) {
         onDirClicked(dirent);
     } else {
@@ -1558,6 +1577,63 @@ void FileBrowserDialog::onGetDirentsPaste()
                                file_names_to_be_pasted_,
                                repo_.id,
                                current_path_);
+}
+
+void FileBrowserDialog::doPushDirent(bool is_push, const QMap<QString, int> &file_names)
+{
+    QMap<QString, int> names;
+    if (is_push) {
+        QList<SeafDirent> list = RepoService::instance()->getEbomRepos();
+        QString name;
+        for(SeafDirent it : list) {
+            name = it.zeron_code + "_" + it.version + it.suffix;
+            QMap<QString, int>::const_iterator mit = file_names.find(name);
+            if (mit != file_names.end()) {
+                names.insert(name, 1);
+            } else {
+                continue;
+            }
+        }
+        if (names.isEmpty()) {
+            seafApplet->warningBox(tr("Unable to push, ebom not found"), this);
+            return;
+        }
+    } else {
+        names = file_names;
+    }
+
+    ServerRepo serverRepo;
+    if (is_push) {
+        serverRepo = RepoService::instance()->getPdmRepo();
+    } else {
+        serverRepo = RepoService::instance()->getMyRepo();
+    }
+
+    QString msg = QString("ServerRepo: name = %1, repo_id = %2\n").arg(serverRepo.name, serverRepo.repo_id);;
+    qInfo() << msg;
+    if (serverRepo.repo_id.isEmpty()) {
+        return;
+    }
+    if (serverRepo.repo_id == repo_.id) {
+        if (current_path_ == dir_path_to_be_pasted_from_) {
+            seafApplet->warningBox(tr("Cannot paste files from the same folder"), this);
+            return;
+        }
+    }
+    dc_source_path_ = QString("/");
+    dc_source_repo_id_ = repo_.id;
+    dc_file_names_ = names;
+    dc_dest_path_ = QString("/");
+    dc_dest_repo_id_ = serverRepo.repo_id;
+    qInfo() << QString("doPushDirent: source_repo_id = %1, source_name = %2, source_dir = %3; dest_repo_id = %4, dest_name = %5, dest_dir = %6\n").arg(repo_.id, repo_.name, dc_source_path_, serverRepo.repo_id, serverRepo.name, dc_dest_path_);
+    if (serverRepo.repo_id != repo_.id) {
+        data_mgr_->deleteAndCopyFiles(dc_source_repo_id_,dc_source_path_,dc_file_names_,dc_dest_repo_id_,dc_dest_path_);
+    }
+}
+
+bool FileBrowserDialog::isCatiaRepos()
+{
+    return repo_type_ == 1;
 }
 
 void FileBrowserDialog::onDirentsCopySuccess()

@@ -11,14 +11,15 @@
 
 enum {
     REPO_ITEM_TYPE = QStandardItem::UserType,
-    REPO_CATEGORY_TYPE
+    REPO_CATEGORY_TYPE,
+    PDM_REPO_ITEM_TYPE,
 };
 
 
 class SeafileRepoBaseItem : public QStandardItem
 {
 public:
-    SeafileRepoBaseItem() : level_(0){};
+    SeafileRepoBaseItem() : level_(0),biz_(0){};
 
     void setLevel(int level)
     {
@@ -30,8 +31,19 @@ public:
         return level_;
     }
 
+    void setBiz(int biz)
+    {
+        biz_ = biz;
+    }
+
+    int biz() const
+    {
+        return biz_;
+    }
+
 private:
     int level_;
+    int biz_;
 };
 
 

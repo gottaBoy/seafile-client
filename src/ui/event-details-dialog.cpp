@@ -30,7 +30,7 @@ EventDetailsDialog::EventDetailsDialog(const SeafEvent& event, QWidget *parent)
       event_(event)
 {
     setWindowTitle(tr("Modification Details"));
-    setWindowIcon(QIcon(":/images/seafile.png"));
+    setWindowIcon(QIcon(":/images/zeron.png"));
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     QStackedLayout *layout = new QStackedLayout;

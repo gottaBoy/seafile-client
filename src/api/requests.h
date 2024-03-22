@@ -8,11 +8,13 @@
 
 #include "account.h"
 #include "api-request.h"
-#include "contact-share-info.h"
-#include "api/server-repo.h"
-#include "api/starred-file.h"
+#include "api/catia-event.h"
 #include "api/event.h"
+#include "api/server-repo.h"
 #include "api/sso-status.h"
+#include "api/starred-file.h"
+#include "contact-share-info.h"
+#include "filebrowser/seaf-dirent.h"
 
 class QNetworkReply;
 class QImage;
@@ -574,7 +576,7 @@ public:
                       const QString& keyword,
                       int page = 0,
                       int per_page = 10,
-                      const QString& repo_id = QString());
+                      const QString& repo_id = QString(), const int biz = 0);
     const QString& keyword() const
     {
         return keyword_;
@@ -926,6 +928,75 @@ protected slots:
 
 private:
     Q_DISABLE_COPY(ClientSSOStatusRequest)
+};
+
+// pdm-repos
+class ListPdmReposRequest : public SeafileApiRequest
+{
+    Q_OBJECT
+
+public:
+    explicit ListPdmReposRequest(const Account& account, const int biz = 0);
+
+protected slots:
+    void requestSuccess(QNetworkReply& reply);
+
+signals:
+    void success(const std::vector<ServerRepo>& repos);
+
+private:
+    Q_DISABLE_COPY(ListPdmReposRequest)
+};
+
+class ListEbomReposRequest : public SeafileApiRequest
+{
+    Q_OBJECT
+
+public:
+    explicit ListEbomReposRequest(const Account& account, const int biz = 0);
+
+protected slots:
+    void requestSuccess(QNetworkReply& reply);
+
+signals:
+    void success(const QList<SeafDirent> &dirents);
+
+private:
+    Q_DISABLE_COPY(ListEbomReposRequest)
+};
+
+class GetCatiaEventsRequest : public SeafileApiRequest
+{
+    Q_OBJECT
+public:
+    GetCatiaEventsRequest(const Account& account, int page = 1, int perpage = 25, int avatar_size = 36);
+
+signals:
+    void success(const std::vector<CatiaEvent>& events);
+
+protected slots:
+    void requestSuccess(QNetworkReply& reply);
+
+private:
+    Q_DISABLE_COPY(GetCatiaEventsRequest);
+};
+
+// catia-repos
+class ListCatiaReposRequest : public SeafileApiRequest
+{
+    Q_OBJECT
+
+public:
+    explicit ListCatiaReposRequest(const Account& account, const int biz = 0);
+
+protected slots:
+    void requestSuccess(QNetworkReply& reply);
+
+signals:
+    void success(const std::vector<ServerRepo>& repos);
+
+private:
+    Q_DISABLE_COPY(ListCatiaReposRequest)
 };
 
 #endif // SEAFILE_CLIENT_API_REQUESTS_H

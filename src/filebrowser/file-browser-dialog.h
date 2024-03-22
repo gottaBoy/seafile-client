@@ -65,6 +65,8 @@ public:
 
     friend class FileTableView;
     friend class FileTableModel;
+    int biz = 0;
+    bool isCatiaRepos();
 signals:
     void aboutToClose();
 
@@ -107,6 +109,7 @@ private slots:
     void onGetUploadLinkFailed(const ApiError&);
     void onGetDirentUpdate(const SeafDirent& dirent);
     void onGetDirentsPaste();
+    void doPushDirent(bool is_pull, const QMap<QString ,int> &file_names);
     void onGetSyncSubdirectory(const QString &folder_name);
     void onCancelDownload(const SeafDirent& dirent);
 
@@ -211,6 +214,14 @@ private:
     static QString repo_id_to_be_pasted_from_;
     static Account account_to_be_pasted_from_;
     static bool is_copyed_when_pasted_;
+
+    int repo_type_ = 0;
+    // delete and copy
+    static QString dc_source_path_;
+    static QString dc_source_repo_id_;
+    static QMap<QString, int> dc_file_names_;
+    static QString dc_dest_path_;
+    static QString dc_dest_repo_id_;
 
     QLabel *brand_label_;
     QPushButton *minimize_button_;

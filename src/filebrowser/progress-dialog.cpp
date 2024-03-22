@@ -40,7 +40,7 @@ void FileBrowserProgressDialog::initUI()
 {
     setWindowModality(Qt::NonModal);
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
-    setWindowIcon(QIcon(":/images/seafile.png"));
+    setWindowIcon(QIcon(":/images/zeron.png"));
 
     QVBoxLayout *layout_ = new QVBoxLayout;
     progress_bar_ = new QProgressBar;

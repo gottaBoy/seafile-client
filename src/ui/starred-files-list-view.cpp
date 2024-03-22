@@ -37,12 +37,14 @@ void StarredFilesListView::createActions()
     open_file_action_->setIcon(QIcon(":/images/toolbar/file-gray.png"));
     open_file_action_->setIconVisibleInMenu(true);
     open_file_action_->setStatusTip(tr("Open this file"));
+    open_file_action_->setEnabled(false);
     connect(open_file_action_, SIGNAL(triggered()), this, SLOT(openLocalFile()));
 
     view_file_on_web_action_ = new QAction(tr("view on &Web"), this);
     view_file_on_web_action_->setIcon(QIcon(":/images/cloud-gray.png"));
     view_file_on_web_action_->setIconVisibleInMenu(true);
     view_file_on_web_action_->setStatusTip(tr("view this file on website"));
+    view_file_on_web_action_->setEnabled(false);
     connect(view_file_on_web_action_, SIGNAL(triggered()), this, SLOT(viewFileOnWeb()));
 }
 
@@ -176,14 +178,14 @@ void StarredFilesListView::onItemDoubleClicked(const QModelIndex& index)
     if (!item) {
         return;
     }
-
-    const StarredItem& file = ((StarredFileItem *)item)->file();
-
-    if (!file.isFile()) {
-        openLocalDir(file);
-    } else {
-        openLocalFile(file);
-    }
+//  TODO
+//    const StarredItem& file = ((StarredFileItem *)item)->file();
+//
+//    if (!file.isFile()) {
+//        openLocalDir(file);
+//    } else {
+//        openLocalFile(file);
+//    }
 }
 
 void StarredFilesListView::openLocalFile(const StarredItem& file)

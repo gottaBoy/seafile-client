@@ -11,7 +11,7 @@ SeafileLinkDialog::SeafileLinkDialog(const QString& smart_link, const QString& p
     :web_link_(smart_link), protocol_link_(protocol_link)
 {
     setWindowTitle(tr("%1 Internal Link").arg(getBrand()));
-    setWindowIcon(QIcon(":/images/seafile.png"));
+    setWindowIcon(QIcon(":/images/zeron.png"));
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     QVBoxLayout *layout = new QVBoxLayout;
