@@ -56,12 +56,15 @@ const char* kClientSSOStatusUrl = "api2/client-sso-link/%1/";
 const char* kGetFileActivitiesUrl = "api/v2.1/activities/";
 
 // catia
-// const char* kGetCatiaFileUrl = "https://pdm.intra.zeron.ai/jeecgboot/ebom/list";
-const char* kGetCatiaFileUrl = "http://mock.apifox.com/m1/4073466-0-default/api/ebom/list";
-const char* kPdmFileSearchUrl = "http://mock.apifox.com/m1/4073466-0-default/api/pdm/list";
+const char* kGetCatiaFileUrl = "http://pdm.intra.zeron.ai/api/ebom/list";
+const char* kPdmFileSearchUrl = "http://pdm.intra.zeron.ai/api/pdm/list";
+const char* kListPdmReposUrl = "http://pdm.intra.zeron.ai/api/pdmrepo/list/all";
+const char* kListEbomReposUrl = "http://pdm.intra.zeron.ai/api/ebom/ebom/purchaser";
+// const char* kGetCatiaFileUrl = "http://mock.apifox.com/m1/4073466-0-default/api/ebom/list";
+// const char* kPdmFileSearchUrl = "http://mock.apifox.com/m1/4073466-0-default/api/pdm/list";
 //const char* kListPdmReposUrl = "http://mock.apifox.com/m1/4073466-0-default/api/pdm/repos/list";
-const char* kListPdmReposUrl = "http://10.10.2.63:8081/jeecgboot/pdmrepo/list/all";
-const char* kListEbomReposUrl = "http://10.10.2.63:8081/jeecgboot/ebom/ebom/purchaser";
+// const char* kListPdmReposUrl = "http://10.10.2.63:8081/jeecgboot/pdmrepo/list/all";
+// const char* kListEbomReposUrl = "http://10.10.2.63:8081/jeecgboot/ebom/ebom/purchaser";
 
 } // namespace
 
