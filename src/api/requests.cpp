@@ -56,10 +56,10 @@ const char* kClientSSOStatusUrl = "api2/client-sso-link/%1/";
 const char* kGetFileActivitiesUrl = "api/v2.1/activities/";
 
 // catiapdm
-const char* kGetCatiaFileUrl = "https://pdm.intra.zeron.ai/api/ebom/list";
-const char* kPdmFileSearchUrl = "https://pdm.intra.zeron.ai/api/pdm/list";
-const char* kListPdmReposUrl = "https://pdm.intra.zeron.ai/api/pdmrepo/list/all";
-const char* kListEbomReposUrl = "https://pdm.intra.zeron.ai/api/ebom/ebom/purchaser";
+const char* kGetCatiaFileUrl = "http://dev-pdm.intra.zeron.ai/api/ebom/list";
+const char* kPdmFileSearchUrl = "http://dev-pdm.intra.zeron.ai/api/pdm/list";
+const char* kListPdmReposUrl = "http://dev-pdm.intra.zeron.ai/api/pdmrepo/list/all";
+const char* kListEbomReposUrl = "http://dev-pdm.intra.zeron.ai/api/ebom/ebom/purchaser";
 // const char* kGetCatiaFileUrl = "http://mock.apifox.com/m1/4073466-0-default/api/ebom/list";
 // const char* kPdmFileSearchUrl = "http://mock.apifox.com/m1/4073466-0-default/api/pdm/list";
 //const char* kListPdmReposUrl = "http://mock.apifox.com/m1/4073466-0-default/api/pdm/repos/list";
