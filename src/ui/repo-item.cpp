@@ -13,6 +13,7 @@ RepoItem::RepoItem(const ServerRepo& repo)
     setLocalRepo(local_repo);
 
     sync_now_clicked_ = false;
+    repo_.biz = repo.biz;
 }
 
 void RepoItem::setRepo(const ServerRepo& repo)

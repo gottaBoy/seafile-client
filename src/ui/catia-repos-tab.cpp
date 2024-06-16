@@ -153,7 +153,7 @@ void CatiaReposTab::getPdm()
         return;
     }
     RepoService::instance()->getPdm();
-    RepoService::instance()->getEbom();
+//    RepoService::instance()->getEbom();
 }
 
 void CatiaReposTab::refresh()

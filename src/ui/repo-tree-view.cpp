@@ -575,7 +575,7 @@ void RepoTreeView::onItemDoubleClicked(const QModelIndex& index)
     }
     if (item->type() == REPO_ITEM_TYPE) {
         RepoItem *it = (RepoItem *)item;
-        if (it->biz() == 1) {
+        if (it->repo().biz == 1) {
             FileBrowserManager::getInstance()->openOrActivateDialog(
                 seafApplet->accountManager()->currentAccount(),
                 it->repo());

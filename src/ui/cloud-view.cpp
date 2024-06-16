@@ -175,7 +175,7 @@ void CloudView::createAccountView()
 void CloudView::createTabs()
 {
     tabs_ = new SeafileTabWidget;
-    // tabs_ = new QTabWidget;
+    // tabs_ = new QTabWidget;CreateRepoDialog
 
     QString base_icon_path = ":/images/tabs/";
     QString highlighted_base_icon_path = ":/images/tabs/highlighted/";

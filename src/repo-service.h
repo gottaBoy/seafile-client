@@ -99,6 +99,7 @@ private:
 
     QTimer *refresh_timer_;
     bool in_refresh_;
+    bool has_name_repo_;
 
     bool wipe_in_progress_;
     std::vector<ServerRepo> pdm_repos_;

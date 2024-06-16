@@ -238,8 +238,9 @@ void RepoService::getEbom()
         return;
 
     if (pdm_repos_.empty()) {
-        list_ebom_repo_req_ = new ListEbomReposRequest(*account, 1);
+        return;
     }
+    list_ebom_repo_req_ = new ListEbomReposRequest(*account, 1);
     connect(list_ebom_repo_req_, SIGNAL(success(const QList<SeafDirent> &)),
             this, SLOT(onListEbomSuccess(const QList<SeafDirent> &)));
 
@@ -371,6 +372,7 @@ void RepoService::refresh()
 void RepoService::onRefreshSuccess(const std::vector<ServerRepo>& repos)
 {
     in_refresh_ = false;
+    has_name_repo_ = false;
 
     //    server_repos_ = repos;
     std::vector<ServerRepo> catia_repos;
@@ -378,14 +380,22 @@ void RepoService::onRefreshSuccess(const std::vector<ServerRepo>& repos)
     if (account.isValid()) {
         for (ServerRepo repo: repos) {
             if (repo.name == account.accountInfo.name) {
+                has_name_repo_ = true;
                 repo.repo_id = repo.id;
                 my_repos_.push_back(repo);
                 catia_repos.push_back(repo);
             } else if (isGrepos(repo)) {
+                repo.repo_id = repo.id;
+                repo.biz = 1;
                 catia_repos.push_back(repo);
             }
         }
     }
+
+//    if (!has_name_repo_){
+//        // refresh();
+//        return;
+//    }
 
     server_repos_ = catia_repos;
 

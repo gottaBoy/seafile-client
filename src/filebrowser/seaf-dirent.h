@@ -46,6 +46,7 @@ public:
 
     static SeafDirent dir(const QString& name);
     static SeafDirent file(const QString& name, quint64 size);
+    static quint64 convertTimeStringToQuint64(const QString& timeStr, quint64 defaultTime);
 };
 
 

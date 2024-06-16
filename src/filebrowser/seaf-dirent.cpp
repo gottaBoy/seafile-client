@@ -49,6 +49,9 @@ SeafDirent SeafDirent::fromJSON(const json_t *root, json_error_t */* error */)
         dirent.part_name = dirent.name;
         dirent.name = dirent.id;
         dirent.type = FILE;
+        dirent.size = 0;
+        dirent.modifier_name = json.getString("updateBy");
+        dirent.mtime = convertTimeStringToQuint64(json.getString("createTime"), 0);
     }
 
     return dirent;
@@ -89,4 +92,20 @@ SeafDirent SeafDirent::file(const QString& name, quint64 size)
 
     initCommonFields(&dirent);
     return dirent;
+}
+
+quint64 SeafDirent::convertTimeStringToQuint64(const QString& timeStr, quint64 defaultTime) {
+    // 指定时间字符串的格式
+    QString format = "yyyy-MM-dd HH:mm:ss";
+
+    // 将时间字符串解析为QDateTime对象
+    QDateTime dateTime = QDateTime::fromString(timeStr, format);
+
+    if (!dateTime.isValid()) {
+        qWarning() << "Warning: Invalid time string format. Using default time.";
+        return defaultTime;
+    }
+
+    // 转换为quint64类型的UNIX时间戳
+    return static_cast<quint64>(dateTime.toSecsSinceEpoch());
 }

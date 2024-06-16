@@ -189,6 +189,7 @@ void RepoTreeModel::setRepos(const std::vector<ServerRepo>& repos)
     n = qMin(list.size(), kMaxRecentUpdatedRepos);
     for (i = 0; i < n; i++) {
         RepoItem *item = new RepoItem(list[i]);
+        // item->setBiz(list[i].biz);
         recent_updated_category_->appendRow(item);
     }
     updateLocalReposPerm(list);
@@ -319,9 +320,11 @@ void RepoTreeModel::checkSharedRepo(const ServerRepo& repo)
 void RepoTreeModel::checkOrgRepo(const ServerRepo& repo)
 {
     int row, n = org_repos_category_->rowCount();
-    if (invisibleRootItem()->child(3) != org_repos_category_) {
+    // 3 -> 1
+    if (invisibleRootItem()->child(1) != org_repos_category_) {
         // Insert pub repos after "recent updated", "my libraries", "shared libraries"
-        insertRow(3, org_repos_category_);
+        org_repos_category_->setBiz(1);
+        insertRow(1, org_repos_category_);
     }
     for (row = 0; row < n; row++) {
         RepoItem *item = (RepoItem *)(org_repos_category_->child(row));
@@ -333,6 +336,7 @@ void RepoTreeModel::checkOrgRepo(const ServerRepo& repo)
 
     // the repo is a new one
     RepoItem *item = new RepoItem(repo);
+    // TODO biz_
     org_repos_category_->appendRow(item);
 }
 
