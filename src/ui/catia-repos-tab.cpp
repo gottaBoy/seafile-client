@@ -72,8 +72,11 @@ void CatiaReposTab::initCatiaReposTab()
     connect(svc, SIGNAL(refreshFailed(const ApiError&)),
             this, SLOT(refreshReposFailed(const ApiError&)));
 
+    connect(svc, SIGNAL(getPdmSuccess()),
+            this, SLOT(getPdmSuccess()));
+
     getPdm();
-    refresh();
+//    refresh();
 }
 
 void CatiaReposTab::createRepoTree()
@@ -152,8 +155,16 @@ void CatiaReposTab::getPdm()
         mStack->setCurrentIndex(INDEX_LOGOUT_VIEW);
         return;
     }
+//    if (mStack->currentIndex() == INDEX_LOADING_VIEW) {
+//        RepoService::instance()->getPdm();
+//    }
     RepoService::instance()->getPdm();
 //    RepoService::instance()->getEbom();
+}
+
+void CatiaReposTab::getPdmSuccess()
+{
+    refresh();
 }
 
 void CatiaReposTab::refresh()

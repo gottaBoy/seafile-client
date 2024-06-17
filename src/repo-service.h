@@ -77,6 +77,7 @@ private slots:
 signals:
     void refreshSuccess(const std::vector<ServerRepo>& repos);
     void refreshFailed(const ApiError& error);
+    void getPdmSuccess();
 
 private:
     Q_DISABLE_COPY(RepoService)

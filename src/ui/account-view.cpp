@@ -144,9 +144,13 @@ void AccountView::updateAccountInfoDisplay()
 
         QString host = account.serverUrl.host();
         QString href = account.serverUrl.toString();
-        QString text = QString("<a style="
+//        QString text = QString("<a style="
+//                               "\"color:#A4A4A4; text-decoration: none;\" "
+//                               "href=\"%1\">%2</a>").arg(href).arg(host);
+
+        QString text = QString("<span style="
                                "\"color:#A4A4A4; text-decoration: none;\" "
-                               "href=\"%1\">%2</a>").arg(href).arg(host);
+                               ">%1</span>").arg(host);
 
         mServerAddr->setText(account.isPro() ? QString("%1 <small>%2<small>").arg(text).arg(tr("pro version")) : text);
     } else {

@@ -119,6 +119,7 @@ RepoService::RepoService(QObject *parent)
 {
     refresh_timer_ = new QTimer(this);
     connect(refresh_timer_, SIGNAL(timeout()), this, SLOT(refresh()));
+
     list_repo_req_ = NULL;
     list_pdm_repo_req_ = NULL;
     in_refresh_ = false;
@@ -216,9 +217,10 @@ void RepoService::onListPdmSuccess(const std::vector<ServerRepo>& repos)
         return;
     }
     pdm_repos_ = repos;
-    if (!pdm_repos_.empty()) {
-        refresh();
-    }
+//    if (!pdm_repos_.empty()) {
+//        refresh();
+//    }
+    emit getPdmSuccess();
 }
 
 void RepoService::onListPdmFailed(const ApiError& error)
@@ -256,6 +258,7 @@ void RepoService::onListEbomSuccess(const QList<SeafDirent> &dirents)
     }
     ebom_dirents_ = dirents;
     // refresh();
+//    emit getPdmSuccess();
 }
 
 void RepoService::onListEbomFailed(const ApiError& error)
@@ -268,6 +271,7 @@ void RepoService::refresh()
 {
     if (pdm_repos_.empty()) {
         qWarning("pdm repos is empty\n");
+        getPdm();
         return;
     }
     if (in_refresh_) {
@@ -470,6 +474,7 @@ void RepoService::refresh(bool force)
 {
     if (pdm_repos_.empty()) {
         qWarning("pdm repos is empty\n");
+        getPdm();
         return;
     }
     if (!force || !in_refresh_) {

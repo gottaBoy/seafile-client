@@ -102,7 +102,7 @@ quint64 SeafDirent::convertTimeStringToQuint64(const QString& timeStr, quint64 d
     QDateTime dateTime = QDateTime::fromString(timeStr, format);
 
     if (!dateTime.isValid()) {
-        qWarning() << "Warning: Invalid time string format. Using default time.";
+        // qWarning() << "Warning: Invalid time string format. Using default time.";
         return defaultTime;
     }
 

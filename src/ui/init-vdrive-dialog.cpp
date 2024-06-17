@@ -48,6 +48,7 @@ InitVirtualDriveDialog::InitVirtualDriveDialog(const Account& account, QWidget *
     check_download_timer_ = NULL;
     connect(mYesBtn, SIGNAL(clicked()), this, SLOT(start()));
     connect(mNoBtn, SIGNAL(clicked()), this, SLOT(onCancel()));
+    mNoBtn->setVisible(false);
 
     mRunInBackgroundBtn->setVisible(false);
     mFinishBtn->setVisible(false);

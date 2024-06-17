@@ -38,6 +38,7 @@ private slots:
     void refreshRepos(const std::vector<ServerRepo>& repos);
     void refreshReposFailed(const ApiError& error);
     void onFilterTextChanged(const QString& text);
+    void getPdmSuccess();
 
 private:
     void initCatiaReposTab();
